@@ -42,6 +42,8 @@ class VulkanRenderer
         // -- Checker Functions
         bool checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
         bool checkDeviceSuitable(VkPhysicalDevice device);
+    
+        std::vector<const char *> getRequiredExtensions();
 
         // -- Getter Functions
         QueueFamilyIndices getQueueFamilies(VkPhysicalDevice device);

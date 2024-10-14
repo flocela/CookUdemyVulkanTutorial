@@ -49,8 +49,9 @@ void VulkanRenderer::createInstance()
 
     // Creation information for a VkInstance (Vulkan Instance)
     VkInstanceCreateInfo instanceCI = {};
-    instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    instanceCI.pApplicationInfo = &appInfo;
+    instanceCI.sType                = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceCI.flags                = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR; // macOS fix
+    instanceCI.pApplicationInfo     = &appInfo;
 
     // Create list to hold instance extensions
     std::vector<const char*> instanceExtensions = std::vector<const char*>();
@@ -67,6 +68,9 @@ void VulkanRenderer::createInstance()
     {
         instanceExtensions.push_back(glfwExtensions[i]);
     }
+    
+    instanceExtensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME); // macOS fix
+    instanceExtensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME); // macOS fix
 
     // Check Instance Extensions supported...
     if (!checkInstanceExtensionSupport(&instanceExtensions))
