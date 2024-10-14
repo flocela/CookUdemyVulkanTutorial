@@ -1,6 +1,49 @@
 #include "VulkanRenderer.hpp"
+#include <iostream>
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT     messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT            messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+        void                                       *pUserData)
+{
+    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+    return VK_FALSE;
+}
 
+VkResult CreateDebugUtilsMessengerEXT(
+    VkInstance                               instance,
+    const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+    const VkAllocationCallbacks              *pAllocator,
+    VkDebugUtilsMessengerEXT                 *pDebugMessenger)
+{
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+      instance,
+      "vkCreateDebugUtilsMessengerEXT");
+    if (func != nullptr)
+    {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }
+    else
+    {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+}
+
+void DestroyDebugUtilsMessengerEXT(
+    VkInstance                  instance,
+    VkDebugUtilsMessengerEXT    debugMessenger,
+    const VkAllocationCallbacks *pAllocator)
+{
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+      instance,
+      "vkDestroyDebugUtilsMessengerEXT");
+    
+    if (func != nullptr)
+    {
+        func(instance, debugMessenger, pAllocator);
+    }
+}
 
 VulkanRenderer::VulkanRenderer()
 {
@@ -13,6 +56,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
     try
     {
         createInstance();
+        setupDebugMessenger();
         getPhysicalDevice();
         createLogicalDevice();
     }
@@ -28,6 +72,12 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 void VulkanRenderer::cleanup()
 {
     vkDestroyDevice(_mainDevice.logicalDevice, nullptr);
+    
+    if (_enableValidationLayers)
+    {
+    DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
+    }
+    
     vkDestroyInstance(_instance, nullptr);
 }
 
@@ -37,6 +87,11 @@ VulkanRenderer::~VulkanRenderer()
 
 void VulkanRenderer::createInstance()
 {
+    if (_enableValidationLayers && !checkValidationLayerSupport())
+    {
+        throw std::runtime_error("validation layers requested, but not available!");
+    }
+    
     // Information about the application itself
     // Most data here doesn't affect the program and is for developer convenience
     VkApplicationInfo appInfo = {};
@@ -81,9 +136,20 @@ void VulkanRenderer::createInstance()
     instanceCI.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
     instanceCI.ppEnabledExtensionNames = instanceExtensions.data();
 
-    // TODO: Set up Validation Layers that Instance will use
-    instanceCI.enabledLayerCount = 0;
-    instanceCI.ppEnabledLayerNames = nullptr;
+    if (_enableValidationLayers)
+    {
+        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+        instanceCI.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
+        instanceCI.ppEnabledLayerNames = _validationLayers.data();
+
+        populateDebugMessengerCreateInfo(debugCreateInfo);
+        instanceCI.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+    }
+    else{
+        instanceCI.enabledLayerCount = 0;
+        instanceCI.ppEnabledLayerNames = nullptr;
+    }
+    
 
     // Create instance
     VkResult result = vkCreateInstance(&instanceCI, nullptr, &_instance);
@@ -241,3 +307,61 @@ QueueFamilyIndices VulkanRenderer::getQueueFamilies(VkPhysicalDevice device)
 
     return indices;
 }
+
+void VulkanRenderer::populateDebugMessengerCreateInfo(
+    VkDebugUtilsMessengerCreateInfoEXT &createInfo)
+{
+    createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                               VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.pfnUserCallback = debugCallback;
+    createInfo.pUserData = nullptr;  // Optional
+}
+
+void VulkanRenderer::setupDebugMessenger()
+{
+    if (!_enableValidationLayers) return;
+    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    populateDebugMessengerCreateInfo(createInfo);
+    if (CreateDebugUtilsMessengerEXT(_instance, &createInfo, nullptr, &_debugMessenger) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to set up debug messenger!");
+    }
+}
+
+bool VulkanRenderer::checkValidationLayerSupport()
+{
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    for (const char *layerName : _validationLayers)
+    {
+        bool layerFound = false;
+
+        for (const auto &layerProperties : availableLayers)
+        {
+            if (strcmp(layerName, layerProperties.layerName) == 0)
+            {
+                layerFound = true;
+                break;
+            }
+        }
+
+        if (!layerFound)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+

@@ -25,10 +25,12 @@ class VulkanRenderer
             VkDevice logicalDevice;
         }_mainDevice;
         
-        GLFWwindow* _window;
-        VkInstance  _instance;
-        VkQueue     _graphicsQueue;
-
+        bool                            _enableValidationLayers;
+        GLFWwindow*                     _window;
+        VkInstance                      _instance;
+        VkDebugUtilsMessengerEXT        _debugMessenger;
+        VkQueue                         _graphicsQueue;
+        const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
         // Vulkan Functions
         // - Create Functions
@@ -47,5 +49,10 @@ class VulkanRenderer
 
         // -- Getter Functions
         QueueFamilyIndices getQueueFamilies(VkPhysicalDevice device);
+    
+        bool checkValidationLayerSupport();
+        void setupDebugMessenger();
+        void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+
 
 };
