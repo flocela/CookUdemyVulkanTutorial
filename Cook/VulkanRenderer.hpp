@@ -34,12 +34,18 @@ class VulkanRenderer
         VkQueue                         _graphicsQueue;
         VkQueue                         _presentationQueue;
         VkSurfaceKHR                    _surface;
-        const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
+        VkSwapchainKHR                  _swapchain;
+        std::vector<SwapchainImage>     _swapChainImages;
+        VkFormat                        _swapChainImageFormat;
+        VkExtent2D                      _swapChainExtent;
         bool                            _enableValidationLayers;
+        const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
+        
 
         void createInstance();
         void createLogicalDevice();
         void createSurface();
+        void createSwapChain();
         void getPhysicalDevice();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
@@ -50,7 +56,11 @@ class VulkanRenderer
         std::vector<const char *> getRequiredExtensions();
         QueueFamilyIndices        getQueueFamilies(VkPhysicalDevice device);
         SwapChainDetails          getSwapChainDetails(VkPhysicalDevice device);
+        VkSurfaceFormatKHR        chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
+        VkPresentModeKHR          chooseBestPresentMode(const std::vector<VkPresentModeKHR> presentModes);
+        VkExtent2D                chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
         bool                      checkValidationLayerSupport();
+        VkImageView               createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
         
 
 
