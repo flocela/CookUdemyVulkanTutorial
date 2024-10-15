@@ -46,6 +46,7 @@ class VulkanRenderer
         void createLogicalDevice();
         void createSurface();
         void createSwapChain();
+        void createGraphicsPipeline();
         void getPhysicalDevice();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
@@ -61,6 +62,7 @@ class VulkanRenderer
         VkExtent2D                chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
         bool                      checkValidationLayerSupport();
         VkImageView               createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+        VkShaderModule            createShaderModule(const std::vector<char>& code);
         
 
 
