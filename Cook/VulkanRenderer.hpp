@@ -55,7 +55,7 @@ class VulkanRenderer
         bool                      checkPhysicalDeviceSuitable(VkPhysicalDevice device);
         std::vector<const char *> getRequiredExtensions();
         QueueFamilyIndices        getQueueFamilies(VkPhysicalDevice device);
-        SwapChainDetails          getSwapChainDetails(VkPhysicalDevice device);
+        SwapChainDetails          getSwapChainDetailsPerPhysicalDevice(VkPhysicalDevice device);
         VkSurfaceFormatKHR        chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
         VkPresentModeKHR          chooseBestPresentMode(const std::vector<VkPresentModeKHR> presentModes);
         VkExtent2D                chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
