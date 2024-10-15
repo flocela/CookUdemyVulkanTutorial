@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <set>
 
 #include "Utilities.hpp"
 
@@ -19,40 +20,38 @@ class VulkanRenderer
         ~VulkanRenderer();
 
     private:
+    
         struct
         {
             VkPhysicalDevice physicalDevice;
             VkDevice logicalDevice;
         }_mainDevice;
         
-        bool                            _enableValidationLayers;
+        
         GLFWwindow*                     _window;
         VkInstance                      _instance;
         VkDebugUtilsMessengerEXT        _debugMessenger;
         VkQueue                         _graphicsQueue;
+        VkQueue                         _presentationQueue;
+        VkSurfaceKHR                    _surface;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
+        bool                            _enableValidationLayers;
 
-        // Vulkan Functions
-        // - Create Functions
         void createInstance();
         void createLogicalDevice();
-
-        // - Get Functions
+        void createSurface();
         void getPhysicalDevice();
-
-        // - Support Functions
-        // -- Checker Functions
-        bool checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
-        bool checkDeviceSuitable(VkPhysicalDevice device);
-    
-        std::vector<const char *> getRequiredExtensions();
-
-        // -- Getter Functions
-        QueueFamilyIndices getQueueFamilies(VkPhysicalDevice device);
-    
-        bool checkValidationLayerSupport();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+    
+        bool                      checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
+        bool                      checkDeviceExtensionSupport(VkPhysicalDevice device);
+        bool                      checkPhysicalDeviceSuitable(VkPhysicalDevice device);
+        std::vector<const char *> getRequiredExtensions();
+        QueueFamilyIndices        getQueueFamilies(VkPhysicalDevice device);
+        SwapChainDetails          getSwapChainDetails(VkPhysicalDevice device);
+        bool                      checkValidationLayerSupport();
+        
 
 
 };
