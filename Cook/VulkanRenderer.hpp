@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <set>
+#include <array>
 
 #include "Utilities.hpp"
 
@@ -37,6 +38,9 @@ class VulkanRenderer
         VkSwapchainKHR                  _swapchain;
         std::vector<SwapchainImage>     _swapChainImages;
         VkFormat                        _swapChainImageFormat;
+        VkPipeline                      _graphicsPipeline;
+        VkPipelineLayout                _pipelineLayout;
+        VkRenderPass                    _renderPass;
         VkExtent2D                      _swapChainExtent;
         bool                            _enableValidationLayers;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
@@ -47,6 +51,7 @@ class VulkanRenderer
         void createSurface();
         void createSwapChain();
         void createGraphicsPipeline();
+        void createRenderPass();
         void getPhysicalDevice();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
