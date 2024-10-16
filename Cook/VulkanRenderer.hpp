@@ -43,6 +43,9 @@ class VulkanRenderer
         VkRenderPass                    _renderPass;
         VkExtent2D                      _swapChainExtent;
         bool                            _enableValidationLayers;
+        std::vector<VkFramebuffer>      _swapChainFramebuffers;
+        VkCommandPool                   _graphicsCommandPool;
+        std::vector<VkCommandBuffer>    _commandBuffers;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
         
 
@@ -52,9 +55,13 @@ class VulkanRenderer
         void createSwapChain();
         void createGraphicsPipeline();
         void createRenderPass();
+        void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffers();
         void getPhysicalDevice();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+        void recordCommands();
     
         bool                      checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
         bool                      checkDeviceExtensionSupport(VkPhysicalDevice device);

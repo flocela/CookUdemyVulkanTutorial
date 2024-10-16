@@ -9,7 +9,7 @@ const std::vector<const char*> requiredDeviceExtensions =
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-// Indices (locations) of Queue Families (if they exist at all)
+// Indices (locations) per Queue Family types. (if they exist at all)
 struct QueueFamilyIndices
 {
     int graphicsFamily     = -1;        // Location of Graphics Queue Family

@@ -46,6 +46,11 @@
 		5C79BD772CAF813400B826B7 /* Utilities.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Utilities.hpp; sourceTree = "<group>"; };
 		5C79BD7F2CAF826C00B826B7 /* VulkanRenderer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VulkanRenderer.cpp; sourceTree = "<group>"; };
 		5C79BD802CAF826C00B826B7 /* VulkanRenderer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VulkanRenderer.hpp; sourceTree = "<group>"; };
+		5C79BD8C2CBEFA0F00B826B7 /* simple_shader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = simple_shader.frag; sourceTree = "<group>"; };
+		5C79BD8D2CBEFA0F00B826B7 /* simple_shader.frag.spv */ = {isa = PBXFileReference; lastKnownFileType = file; path = simple_shader.frag.spv; sourceTree = "<group>"; };
+		5C79BD8E2CBEFA0F00B826B7 /* simple_shader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = simple_shader.vert; sourceTree = "<group>"; };
+		5C79BD8F2CBEFA0F00B826B7 /* simple_shader.vert.spv */ = {isa = PBXFileReference; lastKnownFileType = file; path = simple_shader.vert.spv; sourceTree = "<group>"; };
+		5C79BD912CBEFE0000B826B7 /* compile.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = compile.sh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +90,8 @@
 		5C79BD612CAF5B1500B826B7 /* Cook */ = {
 			isa = PBXGroup;
 			children = (
+				5C79BD912CBEFE0000B826B7 /* compile.sh */,
+				5C79BD902CBEFA0F00B826B7 /* shaders */,
 				5C79BD622CAF5B1500B826B7 /* main.cpp */,
 				5C79BD762CAF813400B826B7 /* Utilities.cpp */,
 				5C79BD772CAF813400B826B7 /* Utilities.hpp */,
@@ -102,6 +109,17 @@
 				5C79BD6A2CAF5F3900B826B7 /* libglfw.3.4.dylib */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5C79BD902CBEFA0F00B826B7 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				5C79BD8C2CBEFA0F00B826B7 /* simple_shader.frag */,
+				5C79BD8D2CBEFA0F00B826B7 /* simple_shader.frag.spv */,
+				5C79BD8E2CBEFA0F00B826B7 /* simple_shader.vert */,
+				5C79BD8F2CBEFA0F00B826B7 /* simple_shader.vert.spv */,
+			);
+			path = shaders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

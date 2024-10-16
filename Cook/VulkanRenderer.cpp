@@ -63,6 +63,10 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
         createSwapChain();
         createRenderPass();
         createGraphicsPipeline();
+        createFramebuffers();
+        createCommandPool();
+        createCommandBuffers();
+        recordCommands();
     }
     catch (const std::runtime_error &e)
     {
@@ -75,6 +79,11 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 
 void VulkanRenderer::cleanup()
 {
+    vkDestroyCommandPool(_mainDevice.logicalDevice, _graphicsCommandPool, nullptr);
+    for(VkFramebuffer framebuffer : _swapChainFramebuffers)
+    {
+        vkDestroyFramebuffer(_mainDevice.logicalDevice, framebuffer, nullptr);
+    }
     vkDestroyPipeline(_mainDevice.logicalDevice, _graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(_mainDevice.logicalDevice, _pipelineLayout, nullptr);
     vkDestroyRenderPass(_mainDevice.logicalDevice, _renderPass, nullptr);
@@ -570,9 +579,115 @@ void VulkanRenderer::createGraphicsPipeline()
     // Destroy Shader Modules, no longer needed after Pipeline created
     vkDestroyShaderModule(_mainDevice.logicalDevice, fragmentShaderModule, nullptr);
     vkDestroyShaderModule(_mainDevice.logicalDevice, vertexShaderModule, nullptr);
-    
-    
 }
+
+void VulkanRenderer::createFramebuffers()
+{
+    // Resize framebuffer count to equal swap chain image count
+    _swapChainFramebuffers.resize(_swapChainImages.size());
+
+    // Create a framebuffer for each swap chain image
+    for (size_t i = 0; i < _swapChainFramebuffers.size(); i++)
+    {
+        std::array<VkImageView, 1> attachments = {
+            _swapChainImages[i].vkImageView
+        };
+
+        VkFramebufferCreateInfo framebufferCreateInfo = {};
+        framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferCreateInfo.renderPass      = _renderPass;   // Render Pass layout the Framebuffer will be used with
+        framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferCreateInfo.pAttachments    = attachments.data(); // List of attachments (1:1 with Render Pass)
+        framebufferCreateInfo.width           = _swapChainExtent.width;
+        framebufferCreateInfo.height          = _swapChainExtent.height;
+        framebufferCreateInfo.layers          = 1;
+
+        VkResult result = vkCreateFramebuffer(_mainDevice.logicalDevice, &framebufferCreateInfo, nullptr, &_swapChainFramebuffers[i]);
+        if (result != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create a Framebuffer!");
+        }
+    }
+}
+
+void VulkanRenderer::createCommandPool()
+{
+    // Get indices of queue families from device
+    QueueFamilyIndices queueFamilyIndices = getQueueFamilies(_mainDevice.physicalDevice);
+
+    VkCommandPoolCreateInfo poolInfo = {};
+    poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;    // matches Queue Family type
+
+    // Create a Graphics Queue Family Command Pool
+    VkResult result = vkCreateCommandPool(_mainDevice.logicalDevice, &poolInfo, nullptr, &_graphicsCommandPool);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create a Command Pool!");
+    }
+}
+
+void VulkanRenderer::createCommandBuffers()
+{
+    // Resize command buffer count to have one for each framebuffer
+    _commandBuffers.resize(_swapChainFramebuffers.size());
+
+    VkCommandBufferAllocateInfo cbAllocInfo = {};
+    cbAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cbAllocInfo.commandPool        = _graphicsCommandPool;
+    cbAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cbAllocInfo.commandBufferCount = static_cast<uint32_t>(_commandBuffers.size());
+
+    // Allocate command buffers and place handles in array of buffers
+    VkResult result = vkAllocateCommandBuffers(_mainDevice.logicalDevice, &cbAllocInfo, _commandBuffers.data());
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate Command Buffers!");
+    }
+}
+
+void VulkanRenderer::recordCommands()
+{
+    // Information about how to begin each command buffer
+    VkCommandBufferBeginInfo vkCommandBufferBI = {};
+    vkCommandBufferBI.sType                    = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    vkCommandBufferBI.flags                    = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;    // Buffer can be resubmitted when it has already been submitted and is awaiting execution
+
+    // Information about how to begin a render pass (only needed for graphical applications)
+    VkClearValue clearValues[] = {{0.6f, 0.65f, 0.4, 1.0f}};
+    VkRenderPassBeginInfo vkRenderPassBI       = {};
+    vkRenderPassBI.sType                       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    vkRenderPassBI.renderPass                  = _renderPass;
+    vkRenderPassBI.renderArea.offset           = { 0, 0 };
+    vkRenderPassBI.renderArea.extent           = _swapChainExtent;
+    vkRenderPassBI.pClearValues                = clearValues;  // (TODO: Depth Attachment Clear Value)
+    vkRenderPassBI.clearValueCount             = 1;
+
+    for (size_t i = 0; i < _commandBuffers.size(); i++)
+    {
+        vkRenderPassBI.framebuffer = _swapChainFramebuffers[i];
+
+        // Start recording commands to command buffer!
+        VkResult result = vkBeginCommandBuffer(_commandBuffers[i], &vkCommandBufferBI);
+        if (result != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to start recording a Command Buffer!");
+        }
+
+        vkCmdBeginRenderPass(_commandBuffers[i], &vkRenderPassBI, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
+        vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
+        vkCmdEndRenderPass(_commandBuffers[i]);
+
+        // Stop recording to command buffer
+        result = vkEndCommandBuffer(_commandBuffers[i]);
+        if (result != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to stop recording a Command Buffer!");
+        }
+    }
+}
+
 void VulkanRenderer::getPhysicalDevice()
 {
     // Enumerate Physical devices the vkInstance can access
