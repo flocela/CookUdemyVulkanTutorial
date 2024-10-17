@@ -47,9 +47,9 @@ class VulkanRenderer
         std::vector<VkFramebuffer>      _swapChainFramebuffers;
         VkCommandPool                   _graphicsCommandPool;
         std::vector<VkCommandBuffer>    _commandBuffers;
-        std::vector<VkSemaphore>        _imageAvailable;
-        std::vector<VkSemaphore>        _renderFinished;
-        std::vector<VkFence>            _drawFences;
+        std::vector<VkSemaphore>        _imageAvailableVkSemaphores;
+        std::vector<VkSemaphore>        _renderFinishedVkSemaphores;
+        std::vector<VkFence>            _drawVkFences;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
         
 
