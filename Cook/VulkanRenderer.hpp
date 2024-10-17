@@ -16,6 +16,7 @@ class VulkanRenderer
         VulkanRenderer();
 
         int init(GLFWwindow * newWindow);
+        void draw();
         void cleanup();
 
         ~VulkanRenderer();
@@ -28,7 +29,7 @@ class VulkanRenderer
             VkDevice logicalDevice;
         }_mainDevice;
         
-        
+        int                             _currentFrame = 0;
         GLFWwindow*                     _window;
         VkInstance                      _instance;
         VkDebugUtilsMessengerEXT        _debugMessenger;
@@ -46,6 +47,9 @@ class VulkanRenderer
         std::vector<VkFramebuffer>      _swapChainFramebuffers;
         VkCommandPool                   _graphicsCommandPool;
         std::vector<VkCommandBuffer>    _commandBuffers;
+        std::vector<VkSemaphore>        _imageAvailable;
+        std::vector<VkSemaphore>        _renderFinished;
+        std::vector<VkFence>            _drawFences;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
         
 
@@ -58,6 +62,7 @@ class VulkanRenderer
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffers();
+        void createSynchronization();
         void getPhysicalDevice();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
