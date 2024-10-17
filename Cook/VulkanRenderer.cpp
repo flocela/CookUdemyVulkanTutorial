@@ -49,6 +49,9 @@ void DestroyDebugUtilsMessengerEXT(
 VulkanRenderer::VulkanRenderer()
 {}
 
+VulkanRenderer::~VulkanRenderer()
+{}
+
 int VulkanRenderer::init(GLFWwindow * newWindow)
 {
     _window = newWindow;
@@ -114,10 +117,6 @@ void VulkanRenderer::cleanup()
     vkDestroyInstance(_instance, nullptr);
 }
 
-
-VulkanRenderer::~VulkanRenderer()
-{}
-
 void VulkanRenderer::createInstance()
 {
     if (_enableValidationLayers && !checkValidationLayerSupport())
@@ -178,7 +177,8 @@ void VulkanRenderer::createInstance()
         populateDebugMessengerCreateInfo(debugCreateInfo);
         instanceCI.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
     }
-    else{
+    else
+    {
         instanceCI.enabledLayerCount = 0;
         instanceCI.ppEnabledLayerNames = nullptr;
     }
@@ -189,6 +189,17 @@ void VulkanRenderer::createInstance()
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Vulkan Instance!");
+    }
+}
+
+void VulkanRenderer::createSurface()
+{
+    // Create Surface (creates a surface create info struct, runs the create surface function, returns result)
+    VkResult result = glfwCreateWindowSurface(_instance, _window, nullptr, &_surface);
+
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create a surface!");
     }
 }
 
@@ -240,14 +251,29 @@ void VulkanRenderer::createLogicalDevice()
     vkGetDeviceQueue(_mainDevice.logicalDevice, indices.presentationFamily, 0, &_presentationQueue);
 }
 
-void VulkanRenderer::createSurface()
+void VulkanRenderer::getPhysicalDevice()
 {
-    // Create Surface (creates a surface create info struct, runs the create surface function, returns result)
-    VkResult result = glfwCreateWindowSurface(_instance, _window, nullptr, &_surface);
+    // Enumerate Physical devices the vkInstance can access
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
 
-    if (result != VK_SUCCESS)
+    // If no devices available, then none support Vulkan!
+    if (deviceCount == 0)
     {
-        throw std::runtime_error("Failed to create a surface!");
+        throw std::runtime_error("Can't find GPUs that support Vulkan Instance!");
+    }
+
+    // Get list of Physical Devices
+    std::vector<VkPhysicalDevice> physicalDeviceList(deviceCount);
+    vkEnumeratePhysicalDevices(_instance, &deviceCount, physicalDeviceList.data());
+
+    for (const auto &physicalDevice : physicalDeviceList)
+    {
+        if (checkPhysicalDeviceSuitable(physicalDevice))
+        {
+            _mainDevice.physicalDevice = physicalDevice;
+            break;
+        }
     }
 }
 
@@ -296,15 +322,15 @@ void VulkanRenderer::createSwapChain()
             (uint32_t)indices.presentationFamily
         };
 
-        vkSwapChainCI.imageSharingMode = VK_SHARING_MODE_CONCURRENT;        // Image share handling
+        vkSwapChainCI.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;   // Image share handling
         vkSwapChainCI.queueFamilyIndexCount = 2;                            // Number of queues to share images between
-        vkSwapChainCI.pQueueFamilyIndices = queueFamilyIndices;            // Array of queues to share between
+        vkSwapChainCI.pQueueFamilyIndices   = queueFamilyIndices;           // Array of queues to share between
     }
     else
     {
-        vkSwapChainCI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        vkSwapChainCI.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
         vkSwapChainCI.queueFamilyIndexCount = 0;
-        vkSwapChainCI.pQueueFamilyIndices = nullptr;
+        vkSwapChainCI.pQueueFamilyIndices   = nullptr;
     }
 
     // IF old swap chain been destroyed and this one replaces it, then link old one to quickly hand over responsibilities
@@ -336,77 +362,6 @@ void VulkanRenderer::createSwapChain()
 
         // Add to swapchain image list
         _swapChainImages.push_back(swapChainImage);
-    }
-    
-}
-
-void VulkanRenderer::createRenderPass()
-{
-    // Colour attachment of render pass
-    VkAttachmentDescription colourAttachment = {};
-    colourAttachment.format         = _swapChainImageFormat;        // Format to use for attachment
-    colourAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;        // Number of samples to write for multisampling
-    colourAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;       // Describes what to do with attachment before rendering
-    colourAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;      // Describes what to do with attachment after rendering
-    colourAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;   // Describes what to do with stencil before rendering
-    colourAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;  // Describes what to do with stencil after rendering
-
-    // Framebuffer data will be stored as an image, but images can be given different data layouts
-    // to give optimal use for certain operations
-    colourAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;     // Image data layout before render pass starts
-    colourAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // Image data layout after render pass (to change to)
-
-    // Attachment reference uses an attachment index that refers to index in the attachment list passed to renderPassCreateInfo
-    VkAttachmentReference colourAttachmentReference = {};
-    colourAttachmentReference.attachment = 0;
-    colourAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // Information about a particular subpass the Render Pass is using
-    VkSubpassDescription subpass = {};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;         // Pipeline type subpass is to be bound to
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colourAttachmentReference;
-
-    // Need to determine when layout transitions occur using subpass dependencies
-    std::array<VkSubpassDependency, 2> subpassDependencies;
-
-    // Conversion from VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-    // Transition must happen after...
-    subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;                     // Subpass index (VK_SUBPASS_EXTERNAL = Special value meaning outside of renderpass)
-    subpassDependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;  // Pipeline stage
-    subpassDependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;            // Stage access mask (memory access)
-    // But must happen before...
-    subpassDependencies[0].dstSubpass = 0;
-    subpassDependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    subpassDependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    subpassDependencies[0].dependencyFlags = 0;
-
-
-    // Conversion from VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-    // Transition must happen after...
-    subpassDependencies[1].srcSubpass = 0;
-    subpassDependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    subpassDependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;;
-    // But must happen before...
-    subpassDependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-    subpassDependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-    subpassDependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-    subpassDependencies[1].dependencyFlags = 0;
-
-    // Create info for Render Pass
-    VkRenderPassCreateInfo renderPassCreateInfo = {};
-    renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassCreateInfo.attachmentCount = 1;
-    renderPassCreateInfo.pAttachments = &colourAttachment;
-    renderPassCreateInfo.subpassCount = 1;
-    renderPassCreateInfo.pSubpasses = &subpass;
-    renderPassCreateInfo.dependencyCount = static_cast<uint32_t>(subpassDependencies.size());
-    renderPassCreateInfo.pDependencies = subpassDependencies.data();
-
-    VkResult result = vkCreateRenderPass(_mainDevice.logicalDevice, &renderPassCreateInfo, nullptr, &_renderPass);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create a Render Pass!");
     }
 }
 
@@ -449,12 +404,11 @@ void VulkanRenderer::createGraphicsPipeline()
     vertexInputCI.vertexAttributeDescriptionCount      = 0;
     vertexInputCI.pVertexAttributeDescriptions         = nullptr;// List of Vertex Attribute Descriptions (data format and where to bind to/from)
 
-
     // -- INPUT ASSEMBLY --
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyCI = {};
-    inputAssemblyCI.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssemblyCI.topology                               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    inputAssemblyCI.primitiveRestartEnable                 = VK_FALSE;
+    inputAssemblyCI.sType                               = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssemblyCI.topology                            = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssemblyCI.primitiveRestartEnable              = VK_FALSE;
 
 
     // -- VIEWPORT & SCISSOR --
@@ -492,10 +446,9 @@ void VulkanRenderer::createGraphicsPipeline()
     //dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStateEnables.size());
     //dynamicStateCreateInfo.pDynamicStates = dynamicStateEnables.data();
 
-
     // -- RASTERIZER --
     VkPipelineRasterizationStateCreateInfo rasterizerCI = {};
-    rasterizerCI.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rasterizerCI.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizerCI.depthClampEnable        = VK_FALSE;
     rasterizerCI.rasterizerDiscardEnable = VK_FALSE;
     rasterizerCI.polygonMode             = VK_POLYGON_MODE_FILL;
@@ -504,10 +457,9 @@ void VulkanRenderer::createGraphicsPipeline()
     rasterizerCI.frontFace               = VK_FRONT_FACE_CLOCKWISE;
     rasterizerCI.depthBiasEnable         = VK_FALSE;
 
-
     // -- MULTISAMPLING --
     VkPipelineMultisampleStateCreateInfo multisamplingCI = {};
-    multisamplingCI.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisamplingCI.sType                                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisamplingCI.sampleShadingEnable                  = VK_FALSE;
     multisamplingCI.rasterizationSamples                 = VK_SAMPLE_COUNT_1_BIT;
 
@@ -516,26 +468,25 @@ void VulkanRenderer::createGraphicsPipeline()
 
     // Blend Attachment State (how blending is handled)
     VkPipelineColorBlendAttachmentState colourState = {};
-    colourState.colorWriteMask = 
-        VK_COLOR_COMPONENT_R_BIT |
-        VK_COLOR_COMPONENT_G_BIT |    // Colours to apply blending to
-        VK_COLOR_COMPONENT_B_BIT |
-        VK_COLOR_COMPONENT_A_BIT;
-    colourState.blendEnable         = VK_TRUE;
-    colourState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    colourState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    colourState.colorBlendOp        = VK_BLEND_OP_ADD;
+    colourState.colorWriteMask                      = VK_COLOR_COMPONENT_R_BIT |
+                                                      VK_COLOR_COMPONENT_G_BIT |    // Colours to apply blending to
+                                                      VK_COLOR_COMPONENT_B_BIT |
+                                                      VK_COLOR_COMPONENT_A_BIT;
+    colourState.blendEnable                         = VK_TRUE;
+    colourState.srcColorBlendFactor                 = VK_BLEND_FACTOR_SRC_ALPHA;
+    colourState.dstColorBlendFactor                 = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    colourState.colorBlendOp                        = VK_BLEND_OP_ADD;
 
     // Summarised: (VK_BLEND_FACTOR_SRC_ALPHA * new colour) + (VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA * old colour)
     //               (new colour alpha * new colour) + ((1 - new colour alpha) * old colour)
 
-    colourState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colourState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colourState.alphaBlendOp        = VK_BLEND_OP_ADD;
+    colourState.srcAlphaBlendFactor                 = VK_BLEND_FACTOR_ONE;
+    colourState.dstAlphaBlendFactor                 = VK_BLEND_FACTOR_ZERO;
+    colourState.alphaBlendOp                        = VK_BLEND_OP_ADD;
     // Summarised: (1 * new alpha) + (0 * old alpha) = new alpha
 
     VkPipelineColorBlendStateCreateInfo colourBlendingCI = {};
-    colourBlendingCI.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    colourBlendingCI.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colourBlendingCI.logicOpEnable   = VK_FALSE;
     colourBlendingCI.attachmentCount = 1;
     colourBlendingCI.pAttachments    = &colourState;
@@ -562,7 +513,7 @@ void VulkanRenderer::createGraphicsPipeline()
 
     // -- GRAPHICS PIPELINE CREATION --
     VkGraphicsPipelineCreateInfo pipelineCI = {};
-    pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineCI.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineCI.stageCount          = 2;                     // Number of shader stages
     pipelineCI.pStages             = shaderStages;          // List of shader stages
     pipelineCI.pVertexInputState   = &vertexInputCI;        // All the fixed function pipeline states
@@ -579,7 +530,7 @@ void VulkanRenderer::createGraphicsPipeline()
 
     // Pipeline Derivatives : Can create multiple pipelines that derive from one another for optimisation
     pipelineCI.basePipelineHandle  = VK_NULL_HANDLE;       // Existing pipeline to derive from...
-    pipelineCI.basePipelineIndex = -1;                     // or index of pipeline being created to derive from (in case creating multiple at once)
+    pipelineCI.basePipelineIndex   = -1;                     // or index of pipeline being created to derive from (in case creating multiple at once)
 
     result = vkCreateGraphicsPipelines(_mainDevice.logicalDevice, VK_NULL_HANDLE, 1, &pipelineCI, nullptr, &_graphicsPipeline);
     if (result != VK_SUCCESS)
@@ -592,6 +543,75 @@ void VulkanRenderer::createGraphicsPipeline()
     vkDestroyShaderModule(_mainDevice.logicalDevice, vertexShaderModule, nullptr);
 }
 
+void VulkanRenderer::createRenderPass()
+{
+    // Colour attachment of render pass
+    VkAttachmentDescription colourAttachment = {};
+    colourAttachment.format         = _swapChainImageFormat;        // Format to use for attachment
+    colourAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;        // Number of samples to write for multisampling
+    colourAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;       // Describes what to do with attachment before rendering
+    colourAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;      // Describes what to do with attachment after rendering
+    colourAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;   // Describes what to do with stencil before rendering
+    colourAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;  // Describes what to do with stencil after rendering
+
+    // Framebuffer data will be stored as an image, but images can be given different data layouts
+    // to give optimal use for certain operations
+    colourAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;     // Image data layout before render pass starts
+    colourAttachment.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // Image data layout after render pass (to change to)
+
+    // Attachment reference uses an attachment index that refers to index in the attachment list passed to renderPassCreateInfo
+    VkAttachmentReference colourAttachmentReference = {};
+    colourAttachmentReference.attachment            = 0;
+    colourAttachmentReference.layout                = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    // Information about a particular subpass the Render Pass is using
+    VkSubpassDescription subpass                    = {};
+    subpass.pipelineBindPoint                       = VK_PIPELINE_BIND_POINT_GRAPHICS; // Pipeline type subpass is to be bound to
+    subpass.colorAttachmentCount                    = 1;
+    subpass.pColorAttachments                       = &colourAttachmentReference;
+
+    // Need to determine when layout transitions occur using subpass dependencies
+    std::array<VkSubpassDependency, 2> subpassDependencies;
+
+    // Conversion from VK_IMAGE_LAYOUT_UNDEFINED to VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    // Transition must happen after...
+    subpassDependencies[0].srcSubpass      = VK_SUBPASS_EXTERNAL; // Subpass index (VK_SUBPASS_EXTERNAL = Special value meaning outside of renderpass)
+    subpassDependencies[0].srcStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;  // Pipeline stage
+    subpassDependencies[0].srcAccessMask   = VK_ACCESS_MEMORY_READ_BIT;            // Stage access mask (memory access)
+    // But must happen before...
+    subpassDependencies[0].dstSubpass      = 0;
+    subpassDependencies[0].dstStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpassDependencies[0].dstAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    subpassDependencies[0].dependencyFlags = 0;
+
+    // Conversion from VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+    // Transition must happen after...
+    subpassDependencies[1].srcSubpass      = 0;
+    subpassDependencies[1].srcStageMask    = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    subpassDependencies[1].srcAccessMask   = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    // But must happen before...
+    subpassDependencies[1].dstSubpass      = VK_SUBPASS_EXTERNAL;
+    subpassDependencies[1].dstStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    subpassDependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
+    subpassDependencies[1].dependencyFlags = 0;
+
+    // Create info for Render Pass
+    VkRenderPassCreateInfo renderPassCreateInfo = {};
+    renderPassCreateInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassCreateInfo.attachmentCount = 1;
+    renderPassCreateInfo.pAttachments    = &colourAttachment;
+    renderPassCreateInfo.subpassCount    = 1;
+    renderPassCreateInfo.pSubpasses      = &subpass;
+    renderPassCreateInfo.dependencyCount = static_cast<uint32_t>(subpassDependencies.size());
+    renderPassCreateInfo.pDependencies   = subpassDependencies.data();
+
+    VkResult result = vkCreateRenderPass(_mainDevice.logicalDevice, &renderPassCreateInfo, nullptr, &_renderPass);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create a Render Pass!");
+    }
+}
+
 void VulkanRenderer::createFramebuffers()
 {
     // Resize framebuffer count to equal swap chain image count
@@ -600,15 +620,15 @@ void VulkanRenderer::createFramebuffers()
     // Create a framebuffer for each swap chain image
     for (size_t i = 0; i < _swapChainFramebuffers.size(); i++)
     {
-        std::array<VkImageView, 1> attachments = {
+        std::array<VkImageView, 1> vkImageViewAttachments = {
             _swapChainImages[i].vkImageView
         };
 
         VkFramebufferCreateInfo framebufferCreateInfo = {};
-        framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferCreateInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferCreateInfo.renderPass      = _renderPass;   // Render Pass layout the Framebuffer will be used with
-        framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        framebufferCreateInfo.pAttachments    = attachments.data(); // List of attachments (1:1 with Render Pass)
+        framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(vkImageViewAttachments.size());
+        framebufferCreateInfo.pAttachments    = vkImageViewAttachments.data(); // List of attachments (1:1 with Render Pass)
         framebufferCreateInfo.width           = _swapChainExtent.width;
         framebufferCreateInfo.height          = _swapChainExtent.height;
         framebufferCreateInfo.layers          = 1;
@@ -627,8 +647,8 @@ void VulkanRenderer::createCommandPool()
     QueueFamilyIndices queueFamilyIndices = getQueueFamilies(_mainDevice.physicalDevice);
 
     VkCommandPoolCreateInfo poolInfo = {};
-    poolInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;    // matches Queue Family type
+    poolInfo.sType                   = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.queueFamilyIndex        = queueFamilyIndices.graphicsFamily;    // matches Queue Family type
 
     // Create a Graphics Queue Family Command Pool
     VkResult result = vkCreateCommandPool(_mainDevice.logicalDevice, &poolInfo, nullptr, &_graphicsCommandPool);
@@ -644,10 +664,10 @@ void VulkanRenderer::createCommandBuffers()
     _commandBuffers.resize(_swapChainFramebuffers.size());
 
     VkCommandBufferAllocateInfo cbAllocInfo = {};
-    cbAllocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cbAllocInfo.commandPool        = _graphicsCommandPool;
-    cbAllocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    cbAllocInfo.commandBufferCount = static_cast<uint32_t>(_commandBuffers.size());
+    cbAllocInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cbAllocInfo.commandPool                 = _graphicsCommandPool;
+    cbAllocInfo.level                       = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cbAllocInfo.commandBufferCount          = static_cast<uint32_t>(_commandBuffers.size());
 
     // Allocate command buffers and place handles in array of buffers
     VkResult result = vkAllocateCommandBuffers(_mainDevice.logicalDevice, &cbAllocInfo, _commandBuffers.data());
@@ -656,13 +676,13 @@ void VulkanRenderer::createCommandBuffers()
         throw std::runtime_error("Failed to allocate Command Buffers!");
     }
 }
-
+//
 void VulkanRenderer::recordCommands()
 {
     // Information about how to begin each command buffer
     VkCommandBufferBeginInfo vkCommandBufferBI = {};
     vkCommandBufferBI.sType                    = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    //vkCommandBufferBI.flags                    = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;    // Buffer can be resubmitted when it has already been submitted and is awaiting execution. Not needed. Only have 2 frame draws.
+    //vkCommandBufferBI.flags                  = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;    // Buffer can be resubmitted when it has already been submitted and is awaiting execution. Not needed. Only have 2 frame draws.
 
     // Information about how to begin a render pass (only needed for graphical applications)
     VkClearValue clearValues[] = {{0.6f, 0.65f, 0.4, 1.0f}};
@@ -695,6 +715,33 @@ void VulkanRenderer::recordCommands()
         if (result != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to stop recording a Command Buffer!");
+        }
+    }
+}
+
+void VulkanRenderer::createSynchronization()
+{
+    _imageAvailable.resize(MAX_FRAME_DRAWS);
+    _renderFinished.resize(MAX_FRAME_DRAWS);
+    _drawFences    .resize(MAX_FRAME_DRAWS);
+
+    // Semaphore creation information
+    VkSemaphoreCreateInfo semaphoreCI = {};
+    semaphoreCI.sType                 = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    // Fence creation information
+    VkFenceCreateInfo fenceCI = {};
+    fenceCI.sType                     = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceCI.flags                     = VK_FENCE_CREATE_SIGNALED_BIT; // Fence starts off open.
+    
+
+    for (size_t i = 0; i < MAX_FRAME_DRAWS; i++)
+    {
+        if (vkCreateSemaphore(_mainDevice.logicalDevice, &semaphoreCI, nullptr, &_imageAvailable[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(_mainDevice.logicalDevice, &semaphoreCI, nullptr, &_renderFinished[i]) != VK_SUCCESS ||
+            vkCreateFence    (_mainDevice.logicalDevice, &fenceCI, nullptr, &_drawFences[i]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create a Semaphore and/or Fence!");
         }
     }
 }
@@ -732,7 +779,7 @@ void VulkanRenderer::draw()
     }
 
     // -- PRESENT RENDERED IMAGE TO SCREEN --
-    VkPresentInfoKHR presentInfo = {};
+    VkPresentInfoKHR presentInfo   = {};
     presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;                                        // Number of semaphores to wait on
     presentInfo.pWaitSemaphores    = &_renderFinished[_currentFrame];          // Semaphores to wait on
@@ -749,59 +796,6 @@ void VulkanRenderer::draw()
 
     // Get next frame (use % MAX_FRAME_DRAWS to keep value below MAX_FRAME_DRAWS)
     _currentFrame = (_currentFrame + 1) % MAX_FRAME_DRAWS;
-}
-
-void VulkanRenderer::createSynchronization()
-{
-    _imageAvailable.resize(MAX_FRAME_DRAWS);
-    _renderFinished.resize(MAX_FRAME_DRAWS);
-    _drawFences    .resize(MAX_FRAME_DRAWS);
-
-    // Semaphore creation information
-    VkSemaphoreCreateInfo semaphoreCI = {};
-    semaphoreCI.sType                 = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    // Fence creation information
-    VkFenceCreateInfo fenceCI = {};
-    fenceCI.sType             = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceCI.flags             = VK_FENCE_CREATE_SIGNALED_BIT; // Fence starts off open.
-    
-
-    for (size_t i = 0; i < MAX_FRAME_DRAWS; i++)
-    {
-        if (vkCreateSemaphore(_mainDevice.logicalDevice, &semaphoreCI, nullptr, &_imageAvailable[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(_mainDevice.logicalDevice, &semaphoreCI, nullptr, &_renderFinished[i]) != VK_SUCCESS ||
-            vkCreateFence    (_mainDevice.logicalDevice, &fenceCI, nullptr, &_drawFences[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create a Semaphore and/or Fence!");
-        }
-    }
-}
-
-void VulkanRenderer::getPhysicalDevice()
-{
-    // Enumerate Physical devices the vkInstance can access
-    uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
-
-    // If no devices available, then none support Vulkan!
-    if (deviceCount == 0)
-    {
-        throw std::runtime_error("Can't find GPUs that support Vulkan Instance!");
-    }
-
-    // Get list of Physical Devices
-    std::vector<VkPhysicalDevice> physicalDeviceList(deviceCount);
-    vkEnumeratePhysicalDevices(_instance, &deviceCount, physicalDeviceList.data());
-
-    for (const auto &physicalDevice : physicalDeviceList)
-    {
-        if (checkPhysicalDeviceSuitable(physicalDevice))
-        {
-            _mainDevice.physicalDevice = physicalDevice;
-            break;
-        }
-    }
 }
 
 bool VulkanRenderer::checkInstanceExtensionSupport(std::vector<const char*>* checkExtensions)
