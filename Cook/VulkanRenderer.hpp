@@ -9,7 +9,7 @@
 #include <array>
 
 #include "Utilities.hpp"
-
+#include "Mesh.hpp"
 class VulkanRenderer
 {
     public:
@@ -51,6 +51,7 @@ class VulkanRenderer
         std::vector<VkSemaphore>        _renderFinishedVkSemaphores;
         std::vector<VkFence>            _drawVkFences;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
+        Mesh                            _firstMesh;
         
 
         void createInstance();

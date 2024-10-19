@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <fstream>
+#include <glm/glm.hpp>
 
 const int MAX_FRAME_DRAWS = 2;
 
@@ -22,6 +23,13 @@ struct QueueFamilyIndices
     {
         return graphicsFamily >= 0 && presentationFamily >= 0;
     }
+};
+
+// Vertex data representation
+struct Vertex
+{
+    glm::vec3 pos; // Vertex Position (x, y, z)
+    glm::vec3 col; // Vertex Colour (r, g, b)
 };
 
 struct SwapChainDetails
