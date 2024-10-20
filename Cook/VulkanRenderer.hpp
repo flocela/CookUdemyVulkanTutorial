@@ -51,7 +51,7 @@ class VulkanRenderer
         std::vector<VkSemaphore>        _renderFinishedVkSemaphores;
         std::vector<VkFence>            _drawVkFences;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
-        Mesh                            _firstMesh;
+        std::vector<Mesh>               _meshList;
         
 
         void createInstance();
