@@ -2,6 +2,8 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -16,6 +18,7 @@ class VulkanRenderer
         VulkanRenderer();
 
         int init(GLFWwindow * newWindow);
+        void updateModel(glm::mat4 newModel);
         void draw();
         void cleanup();
 
@@ -52,6 +55,17 @@ class VulkanRenderer
         std::vector<VkFence>            _drawVkFences;
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
         std::vector<Mesh>               _meshList;
+        VkDescriptorSetLayout           _vkDescriptorSetLayout;
+        VkDescriptorPool                _descriptorPool;
+        std::vector<VkDescriptorSet>    _descriptorSets;
+        std::vector<VkBuffer>           _uniformBuffer;
+        std::vector<VkDeviceMemory>     _uniformBufferMemory;
+        struct MVP
+        {
+            glm::mat4 projection;
+            glm::mat4 view;
+            glm::mat4 model;
+        } _mvp;
         
 
         void createInstance();
@@ -60,10 +74,15 @@ class VulkanRenderer
         void createSwapChain();
         void createGraphicsPipeline();
         void createRenderPass();
+        void createDescriptorSetLayout();
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffers();
         void createSynchronization();
+        void createUniformBuffers();
+        void createDescriptorPool();
+        void createDescriptorSets();
+        void updateUniformBuffer(uint32_t imageIndex);
         void getPhysicalDevice();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
