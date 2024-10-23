@@ -858,6 +858,8 @@ void VulkanRenderer::createCommandBuffers()
         throw std::runtime_error("Failed to allocate Command Buffers!");
     }
 }
+
+// Must be per imageIndex. Can not update all of them at the same time because one of them may be being read in the command buffer.
 void VulkanRenderer::updateUniformBuffer(uint32_t imageIndex)
 {
     void * data;
@@ -966,7 +968,7 @@ void VulkanRenderer::draw()
     uint32_t imageIndex;
     vkAcquireNextImageKHR(_mainDevice.logicalDevice, _swapchain, std::numeric_limits<uint64_t>::max(), _imageAvailableVkSemaphores[_currentFrame], VK_NULL_HANDLE, &imageIndex);
     
-    updateUniformBuffer(imageIndex);
+    updateUniformBuffer(imageIndex); // update _uniformBufferMemory[imageIndex] with new rotation angle
     
     // -- SUBMIT COMMAND BUFFER TO RENDER --
     // Queue submission information
