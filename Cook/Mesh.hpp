@@ -7,7 +7,7 @@
 
 #include "Utilities.hpp"
 
-struct UboModel {
+struct Model {
     glm::mat4 model;
 };
 
@@ -23,7 +23,7 @@ class Mesh
                  std::vector<uint32_t> * indices);
     
         void setModel(glm::mat4 newModel);
-        UboModel getModel();
+        Model getModel();
 
         int getVertexCount();
         VkBuffer getVertexBuffer();
@@ -36,7 +36,7 @@ class Mesh
         ~Mesh();
 
     private:
-        UboModel         _uboModel;
+        Model            _model;
         int              _vertexCount;
         int              _indexCount;
         VkBuffer         _vertexVkBuffer;

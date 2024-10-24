@@ -56,15 +56,12 @@ class VulkanRenderer
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
         std::vector<Mesh>               _meshList;
         VkDescriptorSetLayout           _vkDescriptorSetLayout;
+        VkPushConstantRange             _pushConstantRange;
         VkDescriptorPool                _descriptorPool;
         std::vector<VkDescriptorSet>    _descriptorSets;
         std::vector<VkBuffer>           _vpUniformBuffer;
         std::vector<VkDeviceMemory>     _vpUniformBufferMemory;
-        std::vector<VkBuffer>           _modelDUniformBuffer;
-        std::vector<VkDeviceMemory>     _modelDUniformBufferMemory;
-        VkDeviceSize                    _minUniformBufferOffset;
-        size_t                          _modelUniformAlignment;
-        UboModel*                       _modelTransferSpace;
+        
     
         struct UboViewProjection
         {
@@ -80,6 +77,7 @@ class VulkanRenderer
         void createGraphicsPipeline();
         void createRenderPass();
         void createDescriptorSetLayout();
+        void createPushConstantRange();
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffers();
@@ -92,7 +90,7 @@ class VulkanRenderer
         void allocateDynamicBufferTransferSpace();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-        void recordCommands();
+        void recordCommands(uint32_t currentImage);
     
         bool                      checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
         bool                      checkDeviceExtensionSupport(VkPhysicalDevice device);
