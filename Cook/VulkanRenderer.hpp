@@ -18,7 +18,7 @@ class VulkanRenderer
         VulkanRenderer();
 
         int init(GLFWwindow * newWindow);
-        void updateModel(glm::mat4 newModel);
+        void updateModel(int modelId, glm::mat4 newModel);
         void draw();
         void cleanup();
 
@@ -58,14 +58,19 @@ class VulkanRenderer
         VkDescriptorSetLayout           _vkDescriptorSetLayout;
         VkDescriptorPool                _descriptorPool;
         std::vector<VkDescriptorSet>    _descriptorSets;
-        std::vector<VkBuffer>           _uniformBuffer;
-        std::vector<VkDeviceMemory>     _uniformBufferMemory;
-        struct MVP
+        std::vector<VkBuffer>           _vpUniformBuffer;
+        std::vector<VkDeviceMemory>     _vpUniformBufferMemory;
+        std::vector<VkBuffer>           _modelDUniformBuffer;
+        std::vector<VkDeviceMemory>     _modelDUniformBufferMemory;
+        VkDeviceSize                    _minUniformBufferOffset;
+        size_t                          _modelUniformAlignment;
+        UboModel*                       _modelTransferSpace;
+    
+        struct UboViewProjection
         {
             glm::mat4 projection;
             glm::mat4 view;
-            glm::mat4 model;
-        } _mvp;
+        } _uboViewProjection;
         
 
         void createInstance();
@@ -82,8 +87,9 @@ class VulkanRenderer
         void createUniformBuffers();
         void createDescriptorPool();
         void createDescriptorSets();
-        void updateUniformBuffer(uint32_t imageIndex);
+        void updateUniformBuffers(uint32_t imageIndex);
         void getPhysicalDevice();
+        void allocateDynamicBufferTransferSpace();
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
         void recordCommands();

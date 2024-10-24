@@ -7,6 +7,10 @@
 
 #include "Utilities.hpp"
 
+struct UboModel {
+    glm::mat4 model;
+};
+
 class Mesh
 {
     public:
@@ -17,6 +21,9 @@ class Mesh
                  VkCommandPool transferCommandPool,
                  std::vector<Vertex>* vertices,
                  std::vector<uint32_t> * indices);
+    
+        void setModel(glm::mat4 newModel);
+        UboModel getModel();
 
         int getVertexCount();
         VkBuffer getVertexBuffer();
@@ -29,6 +36,7 @@ class Mesh
         ~Mesh();
 
     private:
+        UboModel         _uboModel;
         int              _vertexCount;
         int              _indexCount;
         VkBuffer         _vertexVkBuffer;
