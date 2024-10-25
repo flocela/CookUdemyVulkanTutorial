@@ -61,7 +61,7 @@ class VulkanRenderer
         VkDescriptorSetLayout           _vkDescriptorSetLayout;
         VkPushConstantRange             _pushConstantRange;
         VkDescriptorPool                _descriptorPool;
-        std::vector<VkDescriptorSet>    _descriptorSets;
+        std::vector<VkDescriptorSet>    _vkDescriptorSets;
         std::vector<VkBuffer>           _vpUniformBuffer;
         std::vector<VkDeviceMemory>     _vpUniformBufferMemory;
         

@@ -894,7 +894,7 @@ void VulkanRenderer::createDescriptorSetLayout()
     vpLayoutBinding.stageFlags                      = VK_SHADER_STAGE_VERTEX_BIT;        // Shader stage to bind to
     vpLayoutBinding.pImmutableSamplers              = nullptr;                           // For Texture: Can make sampler data unchangeable (immutable) by specifying in layout
     
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings = { vpLayoutBinding};
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings = {vpLayoutBinding};
 
     // Create Descriptor Set Layout with given bindings
     VkDescriptorSetLayoutCreateInfo layoutCI        = {};
@@ -913,7 +913,7 @@ void VulkanRenderer::createDescriptorSetLayout()
 void VulkanRenderer::createDescriptorSets()
 {
     // Resize Descriptor Set list so one for every buffer
-    _descriptorSets.resize(_swapChainImages.size());
+    _vkDescriptorSets.resize(_swapChainImages.size());
 
     std::vector<VkDescriptorSetLayout> vkDescriptorSetLayouts(_swapChainImages.size(), _vkDescriptorSetLayout);
 
@@ -925,7 +925,7 @@ void VulkanRenderer::createDescriptorSets()
     setAllocInfo.pSetLayouts                 = vkDescriptorSetLayouts.data();                         // Layouts to use to allocate sets (1:1 relationship)
 
     // Allocate descriptor sets (multiple)
-    VkResult result = vkAllocateDescriptorSets(_mainDevice.logicalDevice, &setAllocInfo, _descriptorSets.data());
+    VkResult result = vkAllocateDescriptorSets(_mainDevice.logicalDevice, &setAllocInfo, _vkDescriptorSets.data());
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate Descriptor Sets!");
@@ -944,7 +944,7 @@ void VulkanRenderer::createDescriptorSets()
         // Data about connection between binding and buffer
         VkWriteDescriptorSet vpSetWrite        = {};
         vpSetWrite.sType                       = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        vpSetWrite.dstSet                      = _descriptorSets[i];                 // Descriptor Set to update
+        vpSetWrite.dstSet                      = _vkDescriptorSets[i];            // Descriptor Set to update
         vpSetWrite.dstBinding                  = 0;                               // Binding to update (matches with binding on layout/shader)
         vpSetWrite.dstArrayElement             = 0;                                  // Index in array to update
         vpSetWrite.descriptorType              = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  // Type of descriptor
@@ -1067,7 +1067,7 @@ void VulkanRenderer::recordCommands(uint32_t currentImage)
         vkCmdPushConstants(_commandBuffers[currentImage], _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Model), &temp);
         
         // Bind Descriptor Sets
-        vkCmdBindDescriptorSets(_commandBuffers[currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_descriptorSets[currentImage], 0, nullptr);
+        vkCmdBindDescriptorSets(_commandBuffers[currentImage], VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1, &_vkDescriptorSets[currentImage], 0, nullptr);
 
         // Execute pipeline
         vkCmdDrawIndexed(_commandBuffers[currentImage], _meshList[j].getIndexCount(), 1, 0, 0, 0);
