@@ -42,6 +42,9 @@ class VulkanRenderer
         VkSwapchainKHR                  _swapchain;
         std::vector<SwapchainImage>     _swapChainImages;
         VkFormat                        _swapChainImageFormat;
+        VkImageView                     _depthBufferVkImageView;
+        VkImage                         _depthBufferVkImage;
+        VkDeviceMemory                  _depthBufferImageVkDeviceMemory;
         VkPipeline                      _graphicsPipeline;
         VkPipelineLayout                _pipelineLayout;
         VkRenderPass                    _renderPass;
@@ -78,6 +81,7 @@ class VulkanRenderer
         void createRenderPass();
         void createDescriptorSetLayout();
         void createPushConstantRange();
+        void createDepthBufferImage();
         void createFramebuffers();
         void createCommandPool();
         void createCommandBuffers();
@@ -101,9 +105,20 @@ class VulkanRenderer
         VkSurfaceFormatKHR        chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
         VkPresentModeKHR          chooseBestPresentMode(const std::vector<VkPresentModeKHR> presentModes);
         VkExtent2D                chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
+        VkFormat                  chooseSupportedFormat(const std::vector<VkFormat> &formats,
+                                                        VkImageTiling tiling,
+                                                        VkFormatFeatureFlags featureFlags);
         bool                      checkValidationLayerSupport();
         VkImageView               createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
         VkShaderModule            createShaderModule(const std::vector<char>& code);
+        VkImage                   createImage(uint32_t width,
+                                              uint32_t height,
+                                              VkFormat format,
+                                              VkImageTiling tiling,
+                                              VkImageUsageFlags useFlags,
+                                              VkMemoryPropertyFlags propFlags,
+                                              VkDeviceMemory *imageMemory);
+    
         
 
 
