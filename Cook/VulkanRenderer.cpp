@@ -600,8 +600,6 @@ void VulkanRenderer::createGraphicsPipeline()
     depthStencilCI.depthBoundsTestEnable = VK_FALSE;        // Depth Bounds Test: Does the depth value exist between two bounds
     depthStencilCI.stencilTestEnable     = VK_FALSE;            // Enable Stencil Test
 
-
-
     // -- GRAPHICS PIPELINE CREATION --
     VkGraphicsPipelineCreateInfo pipelineCI = {};
     pipelineCI.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -638,8 +636,8 @@ void VulkanRenderer::createRenderPass()
     // ATTACHMENTS
     // Colour attachment of render pass
     VkAttachmentDescription colourAttachment = {};
-    colourAttachment.format         = _swapChainImageFormat;        // Format to use for attachment
-    colourAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;        // Number of samples to write for multisampling
+    colourAttachment.format         = _swapChainImageFormat;             // Format to use for attachment
+    colourAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;             // Number of samples to write for multisampling
     colourAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;       // Describes what to do with attachment before rendering
     colourAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;      // Describes what to do with attachment after rendering
     colourAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;   // Describes what to do with stencil before rendering
@@ -826,6 +824,7 @@ void VulkanRenderer::createFramebuffers()
     // Create a framebuffer for each swap chain image
     for (size_t i = 0; i < _swapChainFramebuffers.size(); i++)
     {
+        // In the same order as .pAttachments renderPassAttachments in
         std::array<VkImageView, 2> vkImageViewAttachments = {
             _swapChainImages[i].vkImageView,
             _depthBufferVkImageView
