@@ -10,6 +10,7 @@
 #include <set>
 #include <array>
 
+#include "stb_image.hpp"
 #include "Utilities.hpp"
 #include "Mesh.hpp"
 class VulkanRenderer
@@ -64,6 +65,8 @@ class VulkanRenderer
         std::vector<VkDescriptorSet>    _vkDescriptorSets;
         std::vector<VkBuffer>           _vpUniformBuffer;
         std::vector<VkDeviceMemory>     _vpUniformBufferMemory;
+        std::vector<VkImage>            _textureImages;
+        std::vector<VkDeviceMemory>     _textureImageMemory;
         
     
         struct UboViewProjection
@@ -118,6 +121,8 @@ class VulkanRenderer
                                               VkImageUsageFlags useFlags,
                                               VkMemoryPropertyFlags propFlags,
                                               VkDeviceMemory *imageMemory);
+        stbi_uc*                  loadTextureFile(std::string fileName, int * width, int * height, VkDeviceSize * imageSize);
+        int                       createTexture(std::string fileName);
     
         
 

@@ -116,6 +116,8 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
         createDescriptorPool();
         createDescriptorSets();
         createSynchronization();
+        
+        int firstTexture = createTexture("giraffe.jpg");
     }
     catch (const std::runtime_error &e)
     {
@@ -129,6 +131,12 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 void VulkanRenderer::cleanup()
 {
     vkDeviceWaitIdle(_mainDevice.logicalDevice);
+    
+    for(size_t ii=0; ii<_textureImages.size(); ++ii)
+    {
+        vkDestroyImage(_mainDevice.logicalDevice, _textureImages[ii], nullptr);
+        vkFreeMemory(_mainDevice.logicalDevice, _textureImageMemory[ii], nullptr);
+    }
     
     vkDestroyImageView(_mainDevice.logicalDevice, _depthBufferVkImageView, nullptr);
     vkDestroyImage(_mainDevice.logicalDevice, _depthBufferVkImage, nullptr);
@@ -1170,6 +1178,26 @@ void VulkanRenderer::draw()
     _currentFrame = (_currentFrame + 1) % MAX_FRAME_DRAWS;
 }
 
+stbi_uc * VulkanRenderer::loadTextureFile(std::string fileName, int * width, int * height, VkDeviceSize * imageSize)
+{
+    // Number of channels image uses
+    int channels;
+
+    // Load pixel data for image
+    std::string fileLoc = "/Users/flo/LocalDocuments/Projects/VulkanLearning/Cook/Cook/Textures/" + fileName;
+    stbi_uc* image      = stbi_load(fileLoc.c_str(), width, height, &channels, STBI_rgb_alpha);
+
+    if (!image)
+    {
+        throw std::runtime_error("Failed to load a Texture file! (" + fileName + ")");
+    }
+
+    // Calculate image size using given and known data
+    *imageSize = *width * *height * 4;
+
+    return image;
+}
+
 bool VulkanRenderer::checkInstanceExtensionSupport(std::vector<const char*>* checkExtensions)
 {
     // Need to get number of extensions to create array of correct size to hold extensions
@@ -1200,6 +1228,61 @@ bool VulkanRenderer::checkInstanceExtensionSupport(std::vector<const char*>* che
     }
 
     return true;
+}
+//
+int VulkanRenderer::createTexture(std::string fileName)
+{
+    // Load image file
+    int            width;
+    int            height;
+    VkDeviceSize   imageSize;
+    stbi_uc*       imageData = loadTextureFile(fileName, &width, &height, &imageSize);
+    VkBuffer       imageStagingBuffer;
+    VkDeviceMemory imageStagingBufferMemory;
+    
+    // Create staging buffer to hold loaded data, ready to copy to device
+    createBuffer(_mainDevice.physicalDevice, _mainDevice.logicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        &imageStagingBuffer, &imageStagingBufferMemory);
+
+    // Copy image data to staging buffer
+    void *data;
+    vkMapMemory(_mainDevice.logicalDevice, imageStagingBufferMemory, 0, imageSize, 0, &data);
+    memcpy(data, imageData, static_cast<size_t>(imageSize));
+    vkUnmapMemory(_mainDevice.logicalDevice, imageStagingBufferMemory);
+
+    // Free original image data
+    stbi_image_free(imageData);
+
+    // Create image to hold final texture
+    VkImage texImage;
+    VkDeviceMemory texImageMemory;
+    texImage = createImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texImageMemory);
+
+
+    // COPY DATA TO IMAGE
+    // Transition image to be DST for copy operation
+    transitionImageLayout(_mainDevice.logicalDevice, _graphicsQueue, _graphicsCommandPool,
+        texImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+    // Copy image data
+    copyImageBuffer(_mainDevice.logicalDevice, _graphicsQueue, _graphicsCommandPool, imageStagingBuffer, texImage, width, height);
+
+    // Transition image to be shader readable for shader usage
+    transitionImageLayout(_mainDevice.logicalDevice, _graphicsQueue, _graphicsCommandPool,
+        texImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    // Add texture data to vector for reference
+    _textureImages.push_back(texImage);
+    _textureImageMemory.push_back(texImageMemory);
+
+    // Destroy staging buffers
+    vkDestroyBuffer(_mainDevice.logicalDevice, imageStagingBuffer, nullptr);
+    vkFreeMemory(_mainDevice.logicalDevice, imageStagingBufferMemory, nullptr);
+
+    // Return index of new texture image
+    return _textureImages.size() - 1;
 }
 
 bool VulkanRenderer::checkDeviceExtensionSupport(VkPhysicalDevice device)

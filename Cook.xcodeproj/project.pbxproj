@@ -17,6 +17,7 @@
 		5C79BD782CAF813400B826B7 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD762CAF813400B826B7 /* Utilities.cpp */; };
 		5C79BD812CAF826C00B826B7 /* VulkanRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD7F2CAF826C00B826B7 /* VulkanRenderer.cpp */; };
 		5C79BD942CC3531900B826B7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD922CC3531900B826B7 /* Mesh.cpp */; };
+		5C79BD972CCD922500B826B7 /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD952CCD922500B826B7 /* stb_image.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -54,6 +55,9 @@
 		5C79BD912CBEFE0000B826B7 /* compile.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = compile.sh; sourceTree = "<group>"; };
 		5C79BD922CC3531900B826B7 /* Mesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Mesh.cpp; sourceTree = "<group>"; };
 		5C79BD932CC3531900B826B7 /* Mesh.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Mesh.hpp; sourceTree = "<group>"; };
+		5C79BD952CCD922500B826B7 /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
+		5C79BD962CCD922500B826B7 /* stb_image.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stb_image.hpp; sourceTree = "<group>"; };
+		5C79BD992CCDA60600B826B7 /* giraffe.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = giraffe.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,12 +97,15 @@
 		5C79BD612CAF5B1500B826B7 /* Cook */ = {
 			isa = PBXGroup;
 			children = (
+				5C79BD982CCDA5ED00B826B7 /* Textures */,
 				5C79BD912CBEFE0000B826B7 /* compile.sh */,
 				5C79BD902CBEFA0F00B826B7 /* shaders */,
 				5C79BD622CAF5B1500B826B7 /* main.cpp */,
 				5C79BD762CAF813400B826B7 /* Utilities.cpp */,
 				5C79BD772CAF813400B826B7 /* Utilities.hpp */,
 				5C79BD802CAF826C00B826B7 /* VulkanRenderer.hpp */,
+				5C79BD952CCD922500B826B7 /* stb_image.cpp */,
+				5C79BD962CCD922500B826B7 /* stb_image.hpp */,
 				5C79BD7F2CAF826C00B826B7 /* VulkanRenderer.cpp */,
 				5C79BD922CC3531900B826B7 /* Mesh.cpp */,
 				5C79BD932CC3531900B826B7 /* Mesh.hpp */,
@@ -125,6 +132,14 @@
 				5C79BD8F2CBEFA0F00B826B7 /* simple_shader.vert.spv */,
 			);
 			path = shaders;
+			sourceTree = "<group>";
+		};
+		5C79BD982CCDA5ED00B826B7 /* Textures */ = {
+			isa = PBXGroup;
+			children = (
+				5C79BD992CCDA60600B826B7 /* giraffe.jpg */,
+			);
+			path = Textures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -186,6 +201,7 @@
 			files = (
 				5C79BD812CAF826C00B826B7 /* VulkanRenderer.cpp in Sources */,
 				5C79BD782CAF813400B826B7 /* Utilities.cpp in Sources */,
+				5C79BD972CCD922500B826B7 /* stb_image.cpp in Sources */,
 				5C79BD942CC3531900B826B7 /* Mesh.cpp in Sources */,
 				5C79BD632CAF5B1500B826B7 /* main.cpp in Sources */,
 			);
