@@ -951,8 +951,8 @@ void VulkanRenderer::createDescriptorSets()
         // Data about connection between binding and buffer
         VkWriteDescriptorSet vpSetWrite        = {};
         vpSetWrite.sType                       = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        vpSetWrite.dstSet                      = _vkDescriptorSets[i];            // Descriptor Set to update
-        vpSetWrite.dstBinding                  = 0;                               // Binding to update (matches with binding on layout/shader)
+        vpSetWrite.dstSet                      = _vkDescriptorSets[i]; // Descriptor Set to update
+        vpSetWrite.dstBinding                  = 0; // Binding to update (matches with binding on layout/shader)
         vpSetWrite.dstArrayElement             = 0;                                  // Index in array to update
         vpSetWrite.descriptorType              = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;  // Type of descriptor
         vpSetWrite.descriptorCount             = 1;                                  // Amount to update
