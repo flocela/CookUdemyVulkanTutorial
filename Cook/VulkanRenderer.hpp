@@ -68,7 +68,6 @@ class VulkanRenderer
         std::vector<VkImage>            _textureImages;
         std::vector<VkDeviceMemory>     _textureImageMemory;
         
-    
         struct UboViewProjection
         {
             glm::mat4 projection;
@@ -120,7 +119,7 @@ class VulkanRenderer
                                               VkImageTiling tiling,
                                               VkImageUsageFlags useFlags,
                                               VkMemoryPropertyFlags propFlags,
-                                              VkDeviceMemory *imageMemory);
+                                              VkDeviceMemory *imageVkDeviceMemory);
         stbi_uc*                  loadTextureFile(std::string fileName, int * width, int * height, VkDeviceSize * imageSize);
         int                       createTexture(std::string fileName);
     
