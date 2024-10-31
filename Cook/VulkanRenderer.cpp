@@ -117,7 +117,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
         createDescriptorSets();
         createSynchronization();
         
-        //int firstTexture = createTexture("giraffe.jpg");
+        int firstTexture = createTexture("giraffe.jpg");
     }
     catch (const std::runtime_error &e)
     {
@@ -1178,7 +1178,7 @@ void VulkanRenderer::draw()
     _currentFrame = (_currentFrame + 1) % MAX_FRAME_DRAWS;
 }
 
-stbi_uc * VulkanRenderer::loadTextureFile(std::string fileName, int * width, int * height, VkDeviceSize * imageSize)
+stbi_uc* VulkanRenderer::loadTextureFile(std::string fileName, int* width, int* height, VkDeviceSize* imageSize)
 {
     // Number of channels image uses
     int channels;
@@ -1256,9 +1256,9 @@ int VulkanRenderer::createTexture(std::string fileName)
 
     // Create image to hold final texture
     VkImage texImage;
-    VkDeviceMemory texImageMemory;
+    VkDeviceMemory vkTexDeviceMemory;
     texImage = createImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &texImageMemory);
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vkTexDeviceMemory);
 
 
     // COPY DATA TO IMAGE
@@ -1275,7 +1275,7 @@ int VulkanRenderer::createTexture(std::string fileName)
 
     // Add texture data to vector for reference
     _textureImages.push_back(texImage);
-    _textureImageMemory.push_back(texImageMemory);
+    _textureImageMemory.push_back(vkTexDeviceMemory);
 
     // Destroy staging buffers
     vkDestroyBuffer(_mainDevice.logicalDevice, imageStagingBuffer, nullptr);

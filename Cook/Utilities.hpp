@@ -212,7 +212,7 @@ static void copyImageBuffer(VkDevice device, VkQueue transferQueue, VkCommandPoo
     imageRegion.imageOffset = { 0, 0, 0 };                                    // Offset into image (as opposed to raw data in bufferOffset)
     imageRegion.imageExtent = { width, height, 1 };                            // Size of region to copy as (x, y, z) values
 
-    // Copy buffer to given image
+    // Copy buffer to given image. This is the TRANSFER_WRITE.
     vkCmdCopyBufferToImage(transferCommandBuffer, srcBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageRegion);
 
     endAndSubmitCommandBuffer(device, transferCommandPool, transferQueue, transferCommandBuffer);
@@ -230,9 +230,9 @@ static void transitionImageLayout(VkDevice device, VkQueue queue, VkCommandPool 
     imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;    // Queue family to transition from
     imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;    // Queue family to transition to
     imageMemoryBarrier.image               = image;  // Image being accessed and modified as part of barrier
-    imageMemoryBarrier.subresourceRange.aspectMask   = VK_IMAGE_ASPECT_COLOR_BIT; // Aspect of img being altered
-    imageMemoryBarrier.subresourceRange.baseMipLevel = 0; // First mip level to start alterations on
-    imageMemoryBarrier.subresourceRange.levelCount   = 1; // Number of mip levels to alter starting from baseMipLevel
+    imageMemoryBarrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT; // Aspect of img being altered
+    imageMemoryBarrier.subresourceRange.baseMipLevel   = 0; // First mip level to start alterations on
+    imageMemoryBarrier.subresourceRange.levelCount     = 1; // Number of mip levels to alter starting from baseMipLevel
     imageMemoryBarrier.subresourceRange.baseArrayLayer = 0; // First layer to start alterations on
     imageMemoryBarrier.subresourceRange.layerCount     = 1; // Number of layers to alter starting from baseArrayLayer
 
@@ -242,8 +242,8 @@ static void transitionImageLayout(VkDevice device, VkQueue queue, VkCommandPool 
     // If transitioning from new image to image ready to receive data...
     if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
     {
-        imageMemoryBarrier.srcAccessMask = 0;                                // Memory access stage transition must after...
-        imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;        // Memory access stage transition must before...
+        imageMemoryBarrier.srcAccessMask = 0;                            // Memory access stage transition must after...
+        imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT; // Memory access stage transition must before...
 
         srcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         dstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
@@ -260,10 +260,10 @@ static void transitionImageLayout(VkDevice device, VkQueue queue, VkCommandPool 
 
     vkCmdPipelineBarrier(
         commandBuffer,
-        srcStage, dstStage,        // Pipeline stages (match to src and dst AccessMasks)
+        srcStage, dstStage,       // Pipeline stages (match to src and dst AccessMasks)
         0,                        // Dependency flags
-        0, nullptr,                // Memory Barrier count + data
-        0, nullptr,                // Buffer Memory Barrier count + data
+        0, nullptr,               // Memory Barrier count + data
+        0, nullptr,               // Buffer Memory Barrier count + data
         1, &imageMemoryBarrier    // Image Memory Barrier count + data
     );
 

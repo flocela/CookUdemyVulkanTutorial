@@ -13,6 +13,7 @@
 #include "stb_image.hpp"
 #include "Utilities.hpp"
 #include "Mesh.hpp"
+
 class VulkanRenderer
 {
     public:
@@ -120,7 +121,7 @@ class VulkanRenderer
                                               VkImageUsageFlags useFlags,
                                               VkMemoryPropertyFlags propFlags,
                                               VkDeviceMemory *imageVkDeviceMemory);
-        stbi_uc*                  loadTextureFile(std::string fileName, int * width, int * height, VkDeviceSize * imageSize);
+        stbi_uc*                  loadTextureFile(std::string fileName, int* width, int* height, VkDeviceSize* imageSize);
         int                       createTexture(std::string fileName);
     
         
