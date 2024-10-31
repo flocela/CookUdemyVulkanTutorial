@@ -18,6 +18,7 @@
 		5C79BD812CAF826C00B826B7 /* VulkanRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD7F2CAF826C00B826B7 /* VulkanRenderer.cpp */; };
 		5C79BD942CC3531900B826B7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD922CC3531900B826B7 /* Mesh.cpp */; };
 		5C79BD972CCD922500B826B7 /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD952CCD922500B826B7 /* stb_image.cpp */; };
+		5C79BDA02CD435A700B826B7 /* Circle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C79BD9E2CD435A700B826B7 /* Circle.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,8 @@
 		5C79BD962CCD922500B826B7 /* stb_image.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stb_image.hpp; sourceTree = "<group>"; };
 		5C79BD992CCDA60600B826B7 /* giraffe.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = giraffe.jpg; sourceTree = "<group>"; };
 		5C79BD9A2CD4133F00B826B7 /* panda.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = panda.jpg; sourceTree = "<group>"; };
+		5C79BD9E2CD435A700B826B7 /* Circle.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Circle.cpp; sourceTree = "<group>"; };
+		5C79BD9F2CD435A700B826B7 /* Circle.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Circle.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +107,8 @@
 				5C79BD622CAF5B1500B826B7 /* main.cpp */,
 				5C79BD762CAF813400B826B7 /* Utilities.cpp */,
 				5C79BD772CAF813400B826B7 /* Utilities.hpp */,
+				5C79BD9E2CD435A700B826B7 /* Circle.cpp */,
+				5C79BD9F2CD435A700B826B7 /* Circle.hpp */,
 				5C79BD802CAF826C00B826B7 /* VulkanRenderer.hpp */,
 				5C79BD952CCD922500B826B7 /* stb_image.cpp */,
 				5C79BD962CCD922500B826B7 /* stb_image.hpp */,
@@ -202,6 +207,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5C79BD812CAF826C00B826B7 /* VulkanRenderer.cpp in Sources */,
+				5C79BDA02CD435A700B826B7 /* Circle.cpp in Sources */,
 				5C79BD782CAF813400B826B7 /* Utilities.cpp in Sources */,
 				5C79BD972CCD922500B826B7 /* stb_image.cpp in Sources */,
 				5C79BD942CC3531900B826B7 /* Mesh.cpp in Sources */,

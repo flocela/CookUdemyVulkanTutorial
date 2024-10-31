@@ -1,6 +1,7 @@
 #include "VulkanRenderer.hpp"
 #include <iostream>
 #include <algorithm>
+#include "Circle.hpp"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT     messageSeverity,
@@ -84,40 +85,20 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 
         _uboViewProjection.projection[1][1] *= -1;
         
-        std::vector<Vertex> meshVertices = {
-            { { -0.4, 0.4, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } }, // 0
-            { { -0.4, -0.4, 0.0 },{ 1.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } }, // 1
-            { { 0.4, -0.4, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } }, // 2
-            { { 0.4, 0.4, 0.0 },  { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } },  // 3
-        };
-
-        std::vector<Vertex> meshVertices2 = {
-            { { -0.25, 0.6, 0.0 }, { 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f } }, // 0
-            { { -0.25, -0.6, 0.0 },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 0.0f } }, // 1
-            { { 0.25, -0.6, 0.0 }, { 0.0f, 0.0f, 1.0f },{ 0.0f, 0.0f } }, // 2
-            { { 0.25, 0.6, 0.0 },  { 0.0f, 0.0f, 1.0f },{ 0.0f, 1.0f } }, // 3
-        };
-
-        // Index Data
-        std::vector<uint32_t> meshIndices = {
-            0, 1, 2,
-            2, 3, 0
-        };
+        Circle circle(1.0f, 36);
+        
+        std::vector<Vertex> meshVertices = circle.getVertices();
+                // Index Data
+        std::vector<uint32_t> meshIndices = circle.getIndices();
+        
         Mesh firstMesh = Mesh(_mainDevice.physicalDevice,
                               _mainDevice.logicalDevice,
                               _graphicsQueue,
                               _graphicsCommandPool,
                               &meshVertices, &meshIndices,
                               createTexture("panda.jpg"));
-        Mesh secondMesh = Mesh(_mainDevice.physicalDevice,
-                               _mainDevice.logicalDevice,
-                               _graphicsQueue,
-                               _graphicsCommandPool,
-                               &meshVertices2, &meshIndices,
-                               createTexture("giraffe.jpg"));
         
         _meshList.push_back(firstMesh);
-        _meshList.push_back(secondMesh);
     }
     catch (const std::runtime_error &e)
     {
