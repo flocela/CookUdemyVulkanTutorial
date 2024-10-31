@@ -61,13 +61,19 @@ class VulkanRenderer
         const std::vector<const char *> _validationLayers = {"VK_LAYER_KHRONOS_validation"};
         std::vector<Mesh>               _meshList;
         VkDescriptorSetLayout           _vkDescriptorSetLayout;
+        VkDescriptorSetLayout           _vkSamplerDescriptorSetLayout;
         VkPushConstantRange             _pushConstantRange;
         VkDescriptorPool                _descriptorPool;
+        VkDescriptorPool                _samplerDescriptorPool;
         std::vector<VkDescriptorSet>    _vkDescriptorSets;
+        std::vector<VkDescriptorSet>    _vkSamplerDescriptorSets;
         std::vector<VkBuffer>           _vpUniformBuffer;
         std::vector<VkDeviceMemory>     _vpUniformBufferMemory;
-        std::vector<VkImage>            _textureImages;
-        std::vector<VkDeviceMemory>     _textureImageMemory;
+        VkSampler                       _textureSampler;
+        std::vector<VkImage>            _vkTextureImages;
+        std::vector<VkDeviceMemory>     _vkTextureImageDeviceMemory;
+        std::vector<VkImageView>        _vkTextureImageViews;
+        
         
         struct UboViewProjection
         {
@@ -98,6 +104,7 @@ class VulkanRenderer
         void setupDebugMessenger();
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
         void recordCommands(uint32_t currentImage);
+        void createTextureSampler();
     
         bool                      checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
         bool                      checkDeviceExtensionSupport(VkPhysicalDevice device);
@@ -122,9 +129,8 @@ class VulkanRenderer
                                               VkMemoryPropertyFlags propFlags,
                                               VkDeviceMemory *imageVkDeviceMemory);
         stbi_uc*                  loadTextureFile(std::string fileName, int* width, int* height, VkDeviceSize* imageSize);
+        int                       createTextureImage(std::string fileName);
         int                       createTexture(std::string fileName);
-    
-        
-
+        int                       createTextureDescriptor(VkImageView textureImage);
 
 };

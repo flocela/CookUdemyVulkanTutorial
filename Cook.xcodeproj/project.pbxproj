@@ -58,6 +58,7 @@
 		5C79BD952CCD922500B826B7 /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
 		5C79BD962CCD922500B826B7 /* stb_image.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stb_image.hpp; sourceTree = "<group>"; };
 		5C79BD992CCDA60600B826B7 /* giraffe.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = giraffe.jpg; sourceTree = "<group>"; };
+		5C79BD9A2CD4133F00B826B7 /* panda.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = panda.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +138,7 @@
 		5C79BD982CCDA5ED00B826B7 /* Textures */ = {
 			isa = PBXGroup;
 			children = (
+				5C79BD9A2CD4133F00B826B7 /* panda.jpg */,
 				5C79BD992CCDA60600B826B7 /* giraffe.jpg */,
 			);
 			path = Textures;
