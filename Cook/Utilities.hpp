@@ -94,8 +94,7 @@ static uint32_t findMemoryTypeIndex(VkPhysicalDevice physicalDevice, uint32_t al
     return -1;
 }
 
-static void createBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage,
-    VkMemoryPropertyFlags bufferProperties, VkBuffer* vkBuffer, VkDeviceMemory* vkDeviceMemory)
+static void createBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDeviceSize bufferSize, VkBufferUsageFlags bufferUsage, VkMemoryPropertyFlags bufferProperties, VkBuffer* vkBuffer, VkDeviceMemory* vkDeviceMemory)
 {
     // Information to create a buffer (doesn't include assigning memory)
     VkBufferCreateInfo bufferInfo = {};
@@ -139,20 +138,20 @@ static VkCommandBuffer beginCommandBuffer(VkDevice device, VkCommandPool command
 
     // Command Buffer details
     VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
-    allocInfo.commandBufferCount = 1;
+    allocInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level                       = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool                 = commandPool;
+    allocInfo.commandBufferCount          = 1;
 
     // Allocate command buffer from pool
     vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
 
     // Information to begin the command buffer record
-    VkCommandBufferBeginInfo beginInfo = {};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;    // We're only using the command buffer once, so set up for one time submit
+    VkCommandBufferBeginInfo beginInfo    = {};
+    beginInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags                       = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; // We're only using the command buffer once, so set up for one time submit
 
-                                                                    // Begin recording transfer commands
+    // Begin recording transfer commands
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
     return commandBuffer;
@@ -164,10 +163,10 @@ static void endAndSubmitCommandBuffer(VkDevice device, VkCommandPool commandPool
     vkEndCommandBuffer(commandBuffer);
 
     // Queue submission information
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    VkSubmitInfo submitInfo       = {};
+    submitInfo.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
+    submitInfo.pCommandBuffers    = &commandBuffer;
 
     // Submit transfer command to transfer queue and wait until it finishes
     vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
