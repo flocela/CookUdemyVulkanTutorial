@@ -81,25 +81,36 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
         createSynchronization();
         
         _uboViewProjection.projection = glm::perspective(glm::radians(45.0f), (float)_swapChainExtent.width / (float)_swapChainExtent.height, 0.1f, 100.0f);
-        _uboViewProjection.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        _uboViewProjection.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         _uboViewProjection.projection[1][1] *= 1;
         
-        Circle circle(0.4f, 36);
-        circle.getVertices();
-        circle.getIndices();
+        Circle circle1(0.0f, 0.0f, -2.0f, 2.0f, 36);
+        std::vector<Vertex> mesh1Vertices = circle1.getVertices();
+        std::vector<uint32_t> mesh1Indices = circle1.getIndices();
         
-        std::vector<Vertex> meshVertices = circle.getVertices();
-        std::vector<uint32_t> meshIndices = circle.getIndices();
-        
-        Mesh firstMesh = Mesh(_mainDevice.physicalDevice,
+        Mesh mesh1 = Mesh(_mainDevice.physicalDevice,
                               _mainDevice.logicalDevice,
                               _graphicsQueue,
                               _graphicsCommandPool,
-                              &meshVertices, &meshIndices,
+                              &mesh1Vertices, &mesh1Indices,
                               createTexture("giraffe.jpg"));
+                              
+        Circle circle2(0.0f, 0.0f, 0.0f, 2.0f, 36);
+        std::vector<Vertex> mesh2Vertices = circle2.getVertices();
+        std::vector<uint32_t> mesh2Indices = circle2.getIndices();
         
-        _meshList.push_back(firstMesh);
+        Mesh mesh2 = Mesh(_mainDevice.physicalDevice,
+                              _mainDevice.logicalDevice,
+                              _graphicsQueue,
+                              _graphicsCommandPool,
+                              &mesh2Vertices, &mesh2Indices,
+                              createTexture("panda.jpg"));
+                              
+    
+        
+        _meshList.push_back(mesh1);
+        _meshList.push_back(mesh2);
         
     }
     catch (const std::runtime_error &e)

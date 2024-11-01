@@ -6,17 +6,17 @@
 const float  PI_F=3.14159265358979f;
 using namespace std;
 
-Circle::Circle (float radius, uint32_t numOfTriangles)
-:   _radius{radius}, _numOfT{numOfTriangles}
+Circle::Circle (float x, float y, float z, float radius, uint32_t numOfTriangles)
+:   _x{x}, _y{y}, _z{z}, _radius{radius}, _numOfT{numOfTriangles}
 {
     float radiansPerTriangle = 2.0f * PI_F/_numOfT;
     float multiplier = .5f/_radius;
-    _vertices.push_back({ {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.5f, 0.5f} });
+    _vertices.push_back({ {0.0f + _x, 0.0f + _y, _z}, {1.0f, 0.0f, 0.0f}, {0.5f, 0.5f} });
     for(int ii=0; ii<_numOfT; ++ii)
     {
-        float x = cos(ii*radiansPerTriangle) * _radius;
-        float y = sin(ii*radiansPerTriangle) * _radius;
-        _vertices.push_back({ { x, y, 0.0f },
+        float x = (cos(ii*radiansPerTriangle) * _radius);
+        float y = (sin(ii*radiansPerTriangle) * _radius);
+        _vertices.push_back({ { x + _x, y + _y, _z },
                               { 1.0f, 0.0f, 0.0f },
                               { ( 1.0f - ((x*multiplier) + 0.5f) ),
                                 ((y*multiplier) + 0.5f)}

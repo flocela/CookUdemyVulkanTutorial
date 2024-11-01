@@ -7,7 +7,7 @@
 class Circle
 {
     public:
-        Circle(float radius, uint32_t numOfTriangles);
+        Circle(float x, float y, float z, float radius, uint32_t numOfTriangles);
         Circle() = delete;
         Circle(const Circle& o) = default;
         Circle(Circle&& o) noexcept = default;
@@ -22,6 +22,9 @@ class Circle
         uint32_t              _numOfT; // number of triangles
         float                 _radius;
         std::vector<uint32_t> _indices;
+        float                 _x;
+        float                 _y;
+        float                 _z;
     
 };
 
