@@ -16,15 +16,11 @@ Circle::Circle (float radius, uint32_t numOfTriangles)
     {
         float x = cos(ii*radiansPerTriangle) * _radius;
         float y = sin(ii*radiansPerTriangle) * _radius;
-        //cout << ii << ": " << ( (x/(2*_radius)) + _radius ) << endl;
         _vertices.push_back({ { x, y, 0.0f },
                               { 1.0f, 0.0f, 0.0f },
                               { ( 1.0f - ((x*multiplier) + 0.5f) ),
                                 ((y*multiplier) + 0.5f)}
                             });
-                            
-        std::cout << "(" << _vertices[ii].pos[0] << ", " << _vertices[ii].pos[1] << ", " << _vertices[ii].pos[2] << ") (" << _vertices[ii].tex[0] << ", " << _vertices[ii].tex[1] << ")" <<endl;
-        
         int index = ii+1;
         if(index < _numOfT)
         {
@@ -44,28 +40,10 @@ Circle::Circle (float radius, uint32_t numOfTriangles)
 
 vector<Vertex> Circle::getVertices ()
 {
-    for(Vertex v : _vertices)
-    {
-        std::cout << "(" << v.pos[0] << ", " << v.pos[1] << ", " << v.pos[2] << ") (" << v.tex[0] << ", " << v.tex[1] << ")" <<endl;
-    }
-    
-    cout << endl << endl;
-    
     return _vertices;
 }
 
 vector<uint32_t> Circle::getIndices()
 {
-    int count = 0;
-    for(uint32_t x: _indices)
-    {
-        std::cout << x;
-        
-        ++count;
-        if (count%3 == 0)
-        {
-            cout << endl;
-        }
-    }
     return _indices;
 }

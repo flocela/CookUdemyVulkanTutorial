@@ -89,37 +89,6 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
         circle.getVertices();
         circle.getIndices();
         
-        /*
-        std::vector<Vertex> meshVertices = {
-            { { -0.4, 0.4, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } }, // 0
-            { { -0.4, -0.4, 0.0 },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } }, // 1
-            { { 0.4, -0.4, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } }, // 2
-            { { 0.4, 0.4, 0.0 },  { 1.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } }, // 3
-        };
-        
-        std::vector<uint32_t> meshIndices = {
-            0, 1, 2,
-            2, 3, 0
-        };
-        */
-        /*
-        std::vector<Vertex> meshVertices = {
-            { { 0.0, 0.0, 0.0},   { 1.0f, 0.0f, 0.0f },{ 0.5f, 0.5f } },  // 0
-            { { 0.4, 0.0, 0.0},   { 1.0f, 0.0f, 0.0f },{ 0.0f, 0.5f } },  // 1
-            { { 0.0, 0.4, 0.0},   { 1.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },  // 2
-            { { -0.4, 0.0, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 1.0f, 0.5f } },  // 3
-            { { 0.0, -0.4, 0.0 },  { 1.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } }, // 4
-        };
-        
-        std::vector<uint32_t> meshIndices = {
-            0, 1, 2,
-            0, 2, 3,
-            0, 3, 4,
-            0, 4, 1
-        };
-        */
-        
-        
         std::vector<Vertex> meshVertices = circle.getVertices();
         std::vector<uint32_t> meshIndices = circle.getIndices();
         
