@@ -10,37 +10,43 @@ Circle::Circle (float radius, uint32_t numOfTriangles)
 :   _radius{radius}, _numOfT{numOfTriangles}
 {
     float radiansPerTriangle = 2.0f * PI_F/_numOfT;
-    
-    _vertices.push_back({ {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f} });
+    float multiplier = .5f/_radius;
+    _vertices.push_back({ {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.5f, 0.5f} });
     for(int ii=0; ii<_numOfT; ++ii)
     {
-        _vertices.push_back({ { cos(ii*radiansPerTriangle) * _radius,
-                                -sin(ii*radiansPerTriangle) * _radius, // y points downard.
-                                0.0f },
-                                { 1.0f, 0.0f, 0.0f } });
+        float x = cos(ii*radiansPerTriangle) * _radius;
+        float y = sin(ii*radiansPerTriangle) * _radius;
+        //cout << ii << ": " << ( (x/(2*_radius)) + _radius ) << endl;
+        _vertices.push_back({ { x, y, 0.0f },
+                              { 1.0f, 0.0f, 0.0f },
+                              { ( 1.0f - ((x*multiplier) + 0.5f) ),
+                                ((y*multiplier) + 0.5f)}
+                            });
+                            
+        std::cout << "(" << _vertices[ii].pos[0] << ", " << _vertices[ii].pos[1] << ", " << _vertices[ii].pos[2] << ") (" << _vertices[ii].tex[0] << ", " << _vertices[ii].tex[1] << ")" <<endl;
         
-        if(ii < _numOfT-1)
+        int index = ii+1;
+        if(index < _numOfT)
         {
             _indices.push_back(0);
-            _indices.push_back(ii+2);
-            _indices.push_back(ii+1);
+            _indices.push_back(index);
+            _indices.push_back(index+1);
         }
         else
         {
             _indices.push_back(0);
+            _indices.push_back(index);
             _indices.push_back(1);
-            _indices.push_back(ii+1);
         }
         
     }
-    
 }
 
 vector<Vertex> Circle::getVertices ()
 {
     for(Vertex v : _vertices)
     {
-        std::cout << v.pos[0] << ", " << v.pos[1] << ", " << v.pos[2] << endl;
+        std::cout << "(" << v.pos[0] << ", " << v.pos[1] << ", " << v.pos[2] << ") (" << v.tex[0] << ", " << v.tex[1] << ")" <<endl;
     }
     
     cout << endl << endl;

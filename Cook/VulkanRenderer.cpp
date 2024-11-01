@@ -81,14 +81,46 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
         createSynchronization();
         
         _uboViewProjection.projection = glm::perspective(glm::radians(45.0f), (float)_swapChainExtent.width / (float)_swapChainExtent.height, 0.1f, 100.0f);
-        _uboViewProjection.view = glm::lookAt(glm::vec3(2.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        _uboViewProjection.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        _uboViewProjection.projection[1][1] *= -1;
+        _uboViewProjection.projection[1][1] *= 1;
         
-        Circle circle(1.0f, 36);
+        Circle circle(0.4f, 36);
+        circle.getVertices();
+        circle.getIndices();
+        
+        /*
+        std::vector<Vertex> meshVertices = {
+            { { -0.4, 0.4, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f } }, // 0
+            { { -0.4, -0.4, 0.0 },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f } }, // 1
+            { { 0.4, -0.4, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 1.0f, 0.0f } }, // 2
+            { { 0.4, 0.4, 0.0 },  { 1.0f, 0.0f, 0.0f },{ 1.0f, 1.0f } }, // 3
+        };
+        
+        std::vector<uint32_t> meshIndices = {
+            0, 1, 2,
+            2, 3, 0
+        };
+        */
+        /*
+        std::vector<Vertex> meshVertices = {
+            { { 0.0, 0.0, 0.0},   { 1.0f, 0.0f, 0.0f },{ 0.5f, 0.5f } },  // 0
+            { { 0.4, 0.0, 0.0},   { 1.0f, 0.0f, 0.0f },{ 0.0f, 0.5f } },  // 1
+            { { 0.0, 0.4, 0.0},   { 1.0f, 0.0f, 0.0f },{ 0.5f, 1.0f } },  // 2
+            { { -0.4, 0.0, 0.0 }, { 1.0f, 0.0f, 0.0f },{ 1.0f, 0.5f } },  // 3
+            { { 0.0, -0.4, 0.0 },  { 1.0f, 0.0f, 0.0f },{ 0.5f, 0.0f } }, // 4
+        };
+        
+        std::vector<uint32_t> meshIndices = {
+            0, 1, 2,
+            0, 2, 3,
+            0, 3, 4,
+            0, 4, 1
+        };
+        */
+        
         
         std::vector<Vertex> meshVertices = circle.getVertices();
-                // Index Data
         std::vector<uint32_t> meshIndices = circle.getIndices();
         
         Mesh firstMesh = Mesh(_mainDevice.physicalDevice,
@@ -96,9 +128,10 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                               _graphicsQueue,
                               _graphicsCommandPool,
                               &meshVertices, &meshIndices,
-                              createTexture("panda.jpg"));
+                              createTexture("giraffe.jpg"));
         
         _meshList.push_back(firstMesh);
+        
     }
     catch (const std::runtime_error &e)
     {
@@ -536,7 +569,7 @@ void VulkanRenderer::createGraphicsPipeline()
     rasterizerCI.polygonMode             = VK_POLYGON_MODE_FILL;
     rasterizerCI.lineWidth               = 1.0f;
     rasterizerCI.cullMode                = VK_CULL_MODE_BACK_BIT;
-    rasterizerCI.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizerCI.frontFace               = VK_FRONT_FACE_CLOCKWISE;
     rasterizerCI.depthBiasEnable         = VK_FALSE;
 
     // -- MULTISAMPLING --
