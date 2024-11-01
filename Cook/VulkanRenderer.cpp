@@ -85,7 +85,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 
         _uboViewProjection.projection[1][1] *= 1;
         
-        Circle circle1(0.0f, 0.0f, -2.0f, 2.0f, 36);
+        Circle circle1(0.0f, 0.0f, 0.0f, 2.0f, 36);
         std::vector<Vertex> mesh1Vertices = circle1.getVertices();
         std::vector<uint32_t> mesh1Indices = circle1.getIndices();
         
@@ -96,7 +96,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                               &mesh1Vertices, &mesh1Indices,
                               createTexture("giraffe.jpg"));
                               
-        Circle circle2(0.0f, 0.0f, 0.0f, 2.0f, 36);
+        Circle circle2(0.0f, 0.0f, 0.0f, 4.0f, 36);
         std::vector<Vertex> mesh2Vertices = circle2.getVertices();
         std::vector<uint32_t> mesh2Indices = circle2.getIndices();
         
@@ -107,8 +107,6 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                               &mesh2Vertices, &mesh2Indices,
                               createTexture("panda.jpg"));
                               
-    
-        
         _meshList.push_back(mesh1);
         _meshList.push_back(mesh2);
         

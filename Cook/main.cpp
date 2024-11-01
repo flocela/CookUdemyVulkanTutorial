@@ -49,7 +49,7 @@ int main()
         deltaTime = now - lastTime;
         lastTime = now;
         
-        //angle += 10.0f * deltaTime;
+        angle += 10.0f * deltaTime;
         if(angle > 360.0f)
         {
             angle -= 360.0f;
@@ -57,10 +57,10 @@ int main()
         glm::mat4 firstModel(1.0f);
         glm::mat4 secondModel(1.0f);
 //
-        firstModel = glm::translate(firstModel, glm::vec3(-1.0f, 0.0f, -1.5f)); // red
+        firstModel = glm::translate(firstModel, glm::vec3(-2.0f, 0.0f, 0.0f)); // red
         firstModel = glm::rotate(firstModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        secondModel = glm::translate(secondModel, glm::vec3(1.0f, 0.0f, -3.0f)); // blue
+        secondModel = glm::translate(secondModel, glm::vec3(2.0f, 0.0f, 0.0f)); // blue
         secondModel = glm::rotate(secondModel, glm::radians(-angle * 25), glm::vec3(0.0f, 0.0f, 1.0f));
 
         vulkanRenderer.updateModel(0, firstModel);
