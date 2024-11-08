@@ -85,30 +85,54 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 
         _uboViewProjection.projection[1][1] *= 1;
         
-        Circle circle1(0.0f, 0.0f, 0.0f, 2.0f, 36);
-        std::vector<Vertex> mesh1Vertices = circle1.getVertices();
+        Circle circle0(0.0f, 0.0f, 0.01f, 2.0f, 36);
+        std::vector<Vertex> mesh0Vertices  = circle0.getVertices();
+        std::vector<uint32_t> mesh0Indices = circle0.getIndices();
+        
+        Mesh mesh0 = Mesh(_mainDevice.physicalDevice,
+                          _mainDevice.logicalDevice,
+                          _graphicsQueue,
+                          _graphicsCommandPool,
+                          &mesh0Vertices, &mesh0Indices,
+                          createTexture("giraffe.jpg"));
+        
+        Circle circle1(0.0f, 0.0f, 0.025f, 2.0f, 36);
+        std::vector<Vertex> mesh1Vertices  = circle1.getVertices();
         std::vector<uint32_t> mesh1Indices = circle1.getIndices();
         
         Mesh mesh1 = Mesh(_mainDevice.physicalDevice,
-                              _mainDevice.logicalDevice,
-                              _graphicsQueue,
-                              _graphicsCommandPool,
-                              &mesh1Vertices, &mesh1Indices,
-                              createTexture("giraffe.jpg"));
-                              
-        Circle circle2(0.0f, 0.0f, 0.0f, 4.0f, 36);
-        std::vector<Vertex> mesh2Vertices = circle2.getVertices();
+                          _mainDevice.logicalDevice,
+                          _graphicsQueue,
+                          _graphicsCommandPool,
+                          &mesh1Vertices, &mesh1Indices,
+                          createTexture("panda.jpg"));
+        
+        Circle circle2(0.0f, 0.0f, 0.0f, 3.0f, 36);
+        std::vector<Vertex> mesh2Vertices  = circle2.getVertices();
         std::vector<uint32_t> mesh2Indices = circle2.getIndices();
         
         Mesh mesh2 = Mesh(_mainDevice.physicalDevice,
-                              _mainDevice.logicalDevice,
-                              _graphicsQueue,
-                              _graphicsCommandPool,
-                              &mesh2Vertices, &mesh2Indices,
-                              createTexture("panda.jpg"));
-                              
-        _meshList.push_back(mesh1);
-        _meshList.push_back(mesh2);
+                          _mainDevice.logicalDevice,
+                          _graphicsQueue,
+                          _graphicsCommandPool,
+                          &mesh2Vertices, &mesh2Indices,
+                          createTexture("panda.jpg"));
+        
+        Circle circle3(0.0f, 0.0f, 0.05f, 0.5f, 36);
+        std::vector<Vertex> mesh3Vertices = circle3.getVertices();
+        std::vector<uint32_t> mesh3Indices = circle3.getIndices();
+        
+        Mesh mesh3 = Mesh(_mainDevice.physicalDevice,
+                          _mainDevice.logicalDevice,
+                          _graphicsQueue,
+                          _graphicsCommandPool,
+                          &mesh3Vertices, &mesh3Indices,
+                          createTexture("giraffe.jpg"));
+                          
+        _meshList.push_back(mesh0); 
+        _meshList.push_back(mesh1);                   
+        _meshList.push_back(mesh2);     
+        _meshList.push_back(mesh3);
         
     }
     catch (const std::runtime_error &e)
@@ -159,7 +183,6 @@ void VulkanRenderer::cleanup()
         vkDestroySemaphore(_mainDevice.logicalDevice, _imageAvailableVkSemaphores[i], nullptr);
         vkDestroyFence(_mainDevice.logicalDevice, _drawVkFences[i], nullptr);
     }
-    
     
     vkDestroyCommandPool(_mainDevice.logicalDevice, _graphicsCommandPool, nullptr);
     for(VkFramebuffer framebuffer : _swapChainFramebuffers)

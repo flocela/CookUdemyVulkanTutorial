@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "VulkanRenderer.hpp"
+#include "Circle.hpp"
 
 GLFWwindow* window;
 VulkanRenderer vulkanRenderer;
@@ -40,6 +41,10 @@ int main()
     float deltaTime = 0.0f;
     float lastTime  = 0.0f;
     
+    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 1000};
+    std::vector<Vertex> outlineVertices = outlineCircle.getVertices();
+    int outlineCounter = 0;
+    
     // Loop until closed
     while (!glfwWindowShouldClose(window))
     {
@@ -49,26 +54,38 @@ int main()
         deltaTime = now - lastTime;
         lastTime = now;
         
-        angle += 10.0f * deltaTime;
+        angle += 200.0f * deltaTime;
         if(angle > 360.0f)
         {
             angle -= 360.0f;
         }
+        
+        glm::mat4 zeroithModel(1.0f);
+        zeroithModel = glm::translate(zeroithModel, glm::vec3(-3.0f, 0.0f, 0.0f));
+        zeroithModel = glm::rotate(zeroithModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        
         glm::mat4 firstModel(1.0f);
-        glm::mat4 secondModel(1.0f);
-//
-        firstModel = glm::translate(firstModel, glm::vec3(-2.0f, 0.0f, 0.0f)); // red
+        firstModel = glm::translate(firstModel, glm::vec3(0.0f, 0.0f, 0.0f));
         firstModel = glm::rotate(firstModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        glm::mat4 secondModel(1.0f);
+        secondModel = glm::translate(secondModel, glm::vec3(4.0f, 0.0f, 0.0f));
+        secondModel = glm::rotate(secondModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        glm::mat4 thirdModel(1.0f);
+        thirdModel = glm::translate(thirdModel, outlineVertices[outlineCounter].pos);
+        thirdModel = glm::rotate(thirdModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
-        secondModel = glm::translate(secondModel, glm::vec3(2.0f, 0.0f, 0.0f)); // blue
-        secondModel = glm::rotate(secondModel, glm::radians(-angle * 25), glm::vec3(0.0f, 0.0f, 1.0f));
-
-        vulkanRenderer.updateModel(0, firstModel);
-        vulkanRenderer.updateModel(1, secondModel);
+        vulkanRenderer.updateModel(0, zeroithModel);
+        vulkanRenderer.updateModel(1, firstModel);
+        vulkanRenderer.updateModel(2, secondModel);
+        vulkanRenderer.updateModel(3, thirdModel);
 
         vulkanRenderer.draw();
+        ++outlineCounter;
+        outlineCounter = outlineCounter % 1000;
     }
-
+    
     vulkanRenderer.cleanup();
 
     // Destroy GLFW window and stop GLFW

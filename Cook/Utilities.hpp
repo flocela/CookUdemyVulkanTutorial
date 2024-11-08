@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 
 const int MAX_FRAME_DRAWS = 2;
-const int MAX_OBJECTS = 2;
+const int MAX_OBJECTS = 4;
 
 const std::vector<const char*> requiredDeviceExtensions =
 {
@@ -74,7 +74,6 @@ static std::vector<char> readFile(const std::string &filename)
 
     return fileBuffer;
 }
-
 
 static uint32_t findMemoryTypeIndex(VkPhysicalDevice physicalDevice, uint32_t allowedTypes, VkMemoryPropertyFlags properties)
 {
