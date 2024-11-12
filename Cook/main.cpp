@@ -41,7 +41,7 @@ int main()
     float deltaTime = 0.0f;
     float lastTime  = 0.0f;
     
-    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 1000};
+    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 360};
     std::vector<Vertex> outlineVertices = outlineCircle.getVertices();
     int outlineCounter = 0;
     
@@ -54,12 +54,12 @@ int main()
         deltaTime = now - lastTime;
         lastTime = now;
         
-        angle += 200.0f * deltaTime;
+        angle += 00.0f * deltaTime;
         if(angle > 360.0f)
         {
             angle -= 360.0f;
         }
-        
+        //
         glm::mat4 zeroithModel(1.0f);
         zeroithModel = glm::translate(zeroithModel, glm::vec3(-3.0f, 0.0f, 0.0f));
         zeroithModel = glm::rotate(zeroithModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));

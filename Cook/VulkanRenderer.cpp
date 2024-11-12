@@ -94,8 +94,8 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           _graphicsQueue,
                           _graphicsCommandPool,
                           &mesh0Vertices, &mesh0Indices,
-                          createTexture("giraffe.jpg"));
-        
+                          createTexture("blackLine_R2.jpg"));
+        //
         Circle circle1(0.0f, 0.0f, 0.025f, 2.0f, 36);
         std::vector<Vertex> mesh1Vertices  = circle1.getVertices();
         std::vector<uint32_t> mesh1Indices = circle1.getIndices();
@@ -105,7 +105,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           _graphicsQueue,
                           _graphicsCommandPool,
                           &mesh1Vertices, &mesh1Indices,
-                          createTexture("panda.jpg"));
+                          createTexture("blackLine_R2.jpg"));
         
         Circle circle2(0.0f, 0.0f, 0.0f, 3.0f, 36);
         std::vector<Vertex> mesh2Vertices  = circle2.getVertices();
@@ -116,7 +116,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           _graphicsQueue,
                           _graphicsCommandPool,
                           &mesh2Vertices, &mesh2Indices,
-                          createTexture("panda.jpg"));
+                          createTexture("blackLine_R3.jpg"));
         
         Circle circle3(0.0f, 0.0f, 0.05f, 0.5f, 36);
         std::vector<Vertex> mesh3Vertices = circle3.getVertices();
@@ -127,7 +127,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           _graphicsQueue,
                           _graphicsCommandPool,
                           &mesh3Vertices, &mesh3Indices,
-                          createTexture("giraffe.jpg"));
+                          createTexture("blackLine_R_5.jpg"));
                           
         _meshList.push_back(mesh0); 
         _meshList.push_back(mesh1);                   
