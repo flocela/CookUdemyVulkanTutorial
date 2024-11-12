@@ -37,9 +37,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		5C65E13A2CE312C8001B3883 /* blackLine_R2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = blackLine_R2.jpg; sourceTree = "<group>"; };
-		5C65E13B2CE3130C001B3883 /* blackLine_R_5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = blackLine_R_5.jpg; sourceTree = "<group>"; };
-		5C65E13D2CE313AC001B3883 /* blackLine_R3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = blackLine_R3.jpg; sourceTree = "<group>"; };
+		5C65E1402CE3C3AD001B3883 /* blackLineR2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = blackLineR2.jpg; path = ../../blackLineR2.jpg; sourceTree = "<group>"; };
+		5C65E1412CE3C418001B3883 /* blackLineR3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = blackLineR3.jpg; sourceTree = "<group>"; };
+		5C65E1422CE3C42D001B3883 /* blackLineR_5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = blackLineR_5.jpg; sourceTree = "<group>"; };
 		5C79BD5F2CAF5B1500B826B7 /* Cook */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Cook; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C79BD622CAF5B1500B826B7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		5C79BD6A2CAF5F3900B826B7 /* libglfw.3.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.4.dylib; path = ../../../../../../opt/homebrew/lib/libglfw.3.4.dylib; sourceTree = "<group>"; };
@@ -146,9 +146,9 @@
 		5C79BD982CCDA5ED00B826B7 /* Textures */ = {
 			isa = PBXGroup;
 			children = (
-				5C65E13D2CE313AC001B3883 /* blackLine_R3.jpg */,
-				5C65E13B2CE3130C001B3883 /* blackLine_R_5.jpg */,
-				5C65E13A2CE312C8001B3883 /* blackLine_R2.jpg */,
+				5C65E1422CE3C42D001B3883 /* blackLineR_5.jpg */,
+				5C65E1412CE3C418001B3883 /* blackLineR3.jpg */,
+				5C65E1402CE3C3AD001B3883 /* blackLineR2.jpg */,
 				5C79BD9A2CD4133F00B826B7 /* panda.jpg */,
 				5C79BD992CCDA60600B826B7 /* giraffe.jpg */,
 			);

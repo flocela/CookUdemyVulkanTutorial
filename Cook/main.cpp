@@ -41,25 +41,28 @@ int main()
     float deltaTime = 0.0f;
     float lastTime  = 0.0f;
     
-    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 360};
-    std::vector<Vertex> outlineVertices = outlineCircle.getVertices();
-    int outlineCounter = 0;
+    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 359};
     
+    std::vector<Vertex> outlineVertices = outlineCircle.getVertices();
+    std::cout << "outlineVertices size: " << outlineVertices.size() << std::endl;
+    int outlineCounter = 0;
+    //
     // Loop until closed
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-        
+        //
         float now = glfwGetTime();
         deltaTime = now - lastTime;
         lastTime = now;
         
-        angle += 00.0f * deltaTime;
+        angle += 60.0f * deltaTime;
         if(angle > 360.0f)
         {
+            std::cout << " -360" << std::endl;
             angle -= 360.0f;
         }
-        //
+        
         glm::mat4 zeroithModel(1.0f);
         zeroithModel = glm::translate(zeroithModel, glm::vec3(-3.0f, 0.0f, 0.0f));
         zeroithModel = glm::rotate(zeroithModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -73,8 +76,13 @@ int main()
         secondModel = glm::rotate(secondModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
         
         glm::mat4 thirdModel(1.0f);
-        thirdModel = glm::translate(thirdModel, outlineVertices[outlineCounter].pos);
-        thirdModel = glm::rotate(thirdModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        float twiceAngle = angle * 1.5f;
+        if(twiceAngle > 360.0f){twiceAngle -= 360.0;}
+        std::cout << "deltaTime, angle, twiceAngle: " << "(" << deltaTime <<", " << angle << ", " << twiceAngle << ");  (" << outlineVertices[(int)twiceAngle].pos.x << ", " << outlineVertices[(int)twiceAngle].pos.y << ")" << std::endl;
+        thirdModel = glm::translate(thirdModel, outlineVertices[(int)twiceAngle].pos);
+        std::cout << "angle: " << angle << ": " << std::endl;
+        
+        thirdModel = glm::rotate(thirdModel, glm::radians(3*angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
         vulkanRenderer.updateModel(0, zeroithModel);
         vulkanRenderer.updateModel(1, firstModel);
@@ -82,8 +90,6 @@ int main()
         vulkanRenderer.updateModel(3, thirdModel);
 
         vulkanRenderer.draw();
-        ++outlineCounter;
-        outlineCounter = outlineCounter % 1000;
     }
     
     vulkanRenderer.cleanup();
