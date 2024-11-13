@@ -16,6 +16,7 @@ class Circle
     
         std::vector<Vertex> getVertices();
         std::vector<uint32_t> getIndices();
+        std::vector<glm::vec3>  getOutlineVertices();
         
     private:
         std::vector<Vertex>   _vertices{};

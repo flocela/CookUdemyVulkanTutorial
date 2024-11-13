@@ -38,6 +38,16 @@ Circle::Circle (float x, float y, float z, float radius, uint32_t numOfTriangles
     }
 }
 
+vector<glm::vec3>  Circle::getOutlineVertices()
+{
+    vector<glm::vec3> outline(_vertices.size()-1);
+    for(int ii=1; ii<_vertices.size(); ++ii)
+    {
+        outline[ii-1] = _vertices[ii].pos;
+    }
+    return outline;
+}
+
 vector<Vertex> Circle::getVertices ()
 {
     return _vertices;

@@ -1,6 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define GLFW_INCLUDE_VULKAN
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <chrono>
+#include <thread>
 
 #include <GLFW/glfw3.h>
 
@@ -28,6 +30,8 @@ void initWindow(std::string wName = "Test Window", const int width = 800, const 
 //
 int main()
 {
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    
     // Create Window
     initWindow("Test Window", 1366, 768);
 
@@ -41,12 +45,16 @@ int main()
     float deltaTime = 0.0f;
     float lastTime  = 0.0f;
     
-    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 359};
+    Circle outlineCircle{4.0f, 0.0f, 0.0f, 2.5, 720};
     
     std::vector<Vertex> outlineVertices = outlineCircle.getVertices();
     std::cout << "outlineVertices size: " << outlineVertices.size() << std::endl;
+    for(int ii=0; ii<outlineVertices.size(); ++ii)
+    {
+        std::cout << "(" << outlineVertices[ii].pos.x << ", " << outlineVertices[ii].pos.y << ")" << std::endl;
+    }
     int outlineCounter = 0;
-    //
+    
     // Loop until closed
     while (!glfwWindowShouldClose(window))
     {
@@ -56,11 +64,11 @@ int main()
         deltaTime = now - lastTime;
         lastTime = now;
         
-        angle += 60.0f * deltaTime;
-        if(angle > 360.0f)
+        angle += 20.0f * deltaTime;
+        if(angle > 720.0f)
         {
-            std::cout << " -360" << std::endl;
-            angle -= 360.0f;
+            std::cout << " -760" << std::endl;
+            angle -= 760.0f;
         }
         
         glm::mat4 zeroithModel(1.0f);
@@ -77,12 +85,12 @@ int main()
         
         glm::mat4 thirdModel(1.0f);
         float twiceAngle = angle * 1.5f;
-        if(twiceAngle > 360.0f){twiceAngle -= 360.0;}
+        if(twiceAngle > 720.0f){twiceAngle -= 720.0;}
         std::cout << "deltaTime, angle, twiceAngle: " << "(" << deltaTime <<", " << angle << ", " << twiceAngle << ");  (" << outlineVertices[(int)twiceAngle].pos.x << ", " << outlineVertices[(int)twiceAngle].pos.y << ")" << std::endl;
         thirdModel = glm::translate(thirdModel, outlineVertices[(int)twiceAngle].pos);
         std::cout << "angle: " << angle << ": " << std::endl;
         
-        thirdModel = glm::rotate(thirdModel, glm::radians(3*angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        //thirdModel = glm::rotate(thirdModel, glm::radians(3*angle), glm::vec3(0.0f, 0.0f, 1.0f));
 
         vulkanRenderer.updateModel(0, zeroithModel);
         vulkanRenderer.updateModel(1, firstModel);
