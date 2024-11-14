@@ -56,7 +56,7 @@ VulkanRenderer::~VulkanRenderer()
 int VulkanRenderer::init(GLFWwindow * newWindow)
 {
     _window = newWindow;
-
+//
     try
     {
         createInstance();
@@ -85,7 +85,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 
         _uboViewProjection.projection[1][1] *= 1;
         
-        Circle circle0(0.0f, 0.0f, 0.01f, 2.0f, 36);
+        Circle circle0(0.0f, 0.0f, 0.01f, 2.0f, 3000);
         std::vector<Vertex> mesh0Vertices  = circle0.getVertices();
         std::vector<uint32_t> mesh0Indices = circle0.getIndices();
         
@@ -96,7 +96,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           &mesh0Vertices, &mesh0Indices,
                           createTexture("blackLineR2.jpg"));
         
-        Circle circle1(0.0f, 0.0f, 0.025f, 2.0f, 36);
+        Circle circle1(0.0f, 0.0f, 0.025f, 2.0f, 3000);
         std::vector<Vertex> mesh1Vertices  = circle1.getVertices();
         std::vector<uint32_t> mesh1Indices = circle1.getIndices();
         
@@ -107,7 +107,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           &mesh1Vertices, &mesh1Indices,
                           createTexture("blackLineR2.jpg"));
         
-        Circle circle2(0.0f, 0.0f, 0.0f, 3.0f, 36);
+        Circle circle2(0.0f, 0.0f, 0.0f, 3.0f, 3000);
         std::vector<Vertex> mesh2Vertices  = circle2.getVertices();
         std::vector<uint32_t> mesh2Indices = circle2.getIndices();
         
@@ -118,7 +118,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           &mesh2Vertices, &mesh2Indices,
                           createTexture("blackLineR3.jpg"));
         
-        Circle circle3(0.0f, 0.0f, 0.05f, 0.5f, 36);
+        Circle circle3(0.0f, 0.0f, 0.0f, 0.5f, 3000);
         std::vector<Vertex> mesh3Vertices = circle3.getVertices();
         std::vector<uint32_t> mesh3Indices = circle3.getIndices();
         
