@@ -3,7 +3,7 @@
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 col;
 layout(location = 2) in vec2 tex;
-
+//
 // These two bindings are part of the same descriptor set.
 layout(set = 0, binding=0) uniform UboViewProjection
 {

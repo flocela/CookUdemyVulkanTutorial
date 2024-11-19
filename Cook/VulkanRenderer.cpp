@@ -85,7 +85,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
 
         _uboViewProjection.projection[1][1] *= 1;
         
-        Circle circle0(0.0f, 0.0f, 0.01f, 2.0f, 3000);
+        Circle circle0(0.0f, 0.0f, 0.001f, 2.0f, 3000);
         std::vector<Vertex> mesh0Vertices  = circle0.getVertices();
         std::vector<uint32_t> mesh0Indices = circle0.getIndices();
         
@@ -96,7 +96,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           &mesh0Vertices, &mesh0Indices,
                           createTexture("blackLineR2.jpg"));
         
-        Circle circle1(0.0f, 0.0f, 0.025f, 2.0f, 3000);
+        Circle circle1(0.0f, 0.0f, 0.01f, 2.0f, 3000);
         std::vector<Vertex> mesh1Vertices  = circle1.getVertices();
         std::vector<uint32_t> mesh1Indices = circle1.getIndices();
         
@@ -118,7 +118,7 @@ int VulkanRenderer::init(GLFWwindow * newWindow)
                           &mesh2Vertices, &mesh2Indices,
                           createTexture("blackLineR3.jpg"));
         
-        Circle circle3(0.0f, 0.0f, 0.0f, 0.5f, 3000);
+        Circle circle3(0.0f, 0.0f, 1e-5f, 0.5f, 3000);
         std::vector<Vertex> mesh3Vertices = circle3.getVertices();
         std::vector<uint32_t> mesh3Indices = circle3.getIndices();
         
@@ -387,7 +387,7 @@ void VulkanRenderer::createSwapChain()
     {
         imageCount = std::min(imageCount, swapChainDetails.surfaceCapabilities.maxImageCount);
     }
-
+//
     // Creation information for swap chain
     VkSwapchainCreateInfoKHR vkSwapChainCI = {};
     vkSwapChainCI.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -625,15 +625,14 @@ void VulkanRenderer::createGraphicsPipeline()
         throw std::runtime_error("Failed to create Pipeline Layout!");
     }
 
-
     // -- DEPTH STENCIL TESTING --
     VkPipelineDepthStencilStateCreateInfo depthStencilCI = {};
     depthStencilCI.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilCI.depthTestEnable       = VK_TRUE;                // Enable checking depth to determine fragment write
-    depthStencilCI.depthWriteEnable      = VK_TRUE;           // Enable writing to depth buffer (to replace old values)
-    depthStencilCI.depthCompareOp        = VK_COMPARE_OP_LESS;// Comparison operation that allows an overwrite (is in front)
-    depthStencilCI.depthBoundsTestEnable = VK_FALSE;        // Depth Bounds Test: Does the depth value exist between two bounds
-    depthStencilCI.stencilTestEnable     = VK_FALSE;            // Enable Stencil Test
+    depthStencilCI.depthTestEnable       = VK_TRUE;              // Enable checking depth to determine fragment write
+    depthStencilCI.depthWriteEnable      = VK_TRUE;              // Enable writing to depth buffer (to replace old values)
+    depthStencilCI.depthCompareOp        = VK_COMPARE_OP_LESS;   // Comparison operation that allows an overwrite (is in front)
+    depthStencilCI.depthBoundsTestEnable = VK_FALSE;             // Depth Bounds Test: Does the depth value exist between two bounds
+    depthStencilCI.stencilTestEnable     = VK_FALSE;             // Enable Stencil Test
 
     // -- GRAPHICS PIPELINE CREATION --
     VkGraphicsPipelineCreateInfo pipelineCI = {};
@@ -1250,7 +1249,7 @@ void VulkanRenderer::createSynchronization()
     {
         if (vkCreateSemaphore(_mainDevice.logicalDevice, &semaphoreCI, nullptr, &_imageAvailableVkSemaphores[i]) != VK_SUCCESS ||
             vkCreateSemaphore(_mainDevice.logicalDevice, &semaphoreCI, nullptr, &_renderFinishedVkSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence    (_mainDevice.logicalDevice, &fenceCI, nullptr, &_drawVkFences[i]) != VK_SUCCESS)
+            vkCreateFence    (_mainDevice.logicalDevice, &fenceCI,     nullptr, &_drawVkFences[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create a Semaphore and/or Fence!");
         }
