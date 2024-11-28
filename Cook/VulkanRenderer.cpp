@@ -436,7 +436,7 @@ void VulkanRenderer::createSwapChain()
         // Store image handle
         SwapchainImage swapChainImage = {};
         swapChainImage.vkImage        = vkImage;
-        swapChainImage.vkImageView    = createImageView(vkImage, _swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+        swapChainImage.vkImageView    = createVkImageView(vkImage, _swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
 
         // Add to swapchain image list
         _swapChainImages.push_back(swapChainImage);
@@ -754,11 +754,11 @@ void VulkanRenderer::createDepthBufferImage()
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
     // Create Depth Buffer Image
-    _depthBufferVkImage = createImage(_swapChainExtent.width, _swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
+    _depthBufferVkImage = createVkImage(_swapChainExtent.width, _swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &_depthBufferImageVkDeviceMemory);
 
     // Create Depth Buffer Image View
-    _depthBufferVkImageView = createImageView(_depthBufferVkImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+    _depthBufferVkImageView = createVkImageView(_depthBufferVkImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
 VkFormat VulkanRenderer::chooseSupportedFormat(const std::vector<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags featureFlags)
@@ -784,7 +784,7 @@ VkFormat VulkanRenderer::chooseSupportedFormat(const std::vector<VkFormat>& form
     throw std::runtime_error("Failed to find a matching format!");
 }
 
-VkImage VulkanRenderer::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags useFlags, VkMemoryPropertyFlags propFlags, VkDeviceMemory* imageVkDeviceMemory)
+VkImage VulkanRenderer::createVkImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags useFlags, VkMemoryPropertyFlags propFlags, VkDeviceMemory* imageVkDeviceMemory)
 {
     // CREATE IMAGE
     // Image Creation Info
@@ -819,9 +819,9 @@ VkImage VulkanRenderer::createImage(uint32_t width, uint32_t height, VkFormat fo
 
     // Allocate memory using image requirements and user defined properties
     VkMemoryAllocateInfo memoryAllocInfo = {};
-    memoryAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    memoryAllocInfo.allocationSize = memoryRequirements.size;
-    memoryAllocInfo.memoryTypeIndex = findMemoryTypeIndex(_mainDevice.physicalDevice, memoryRequirements.memoryTypeBits, propFlags);
+    memoryAllocInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    memoryAllocInfo.allocationSize       = memoryRequirements.size;
+    memoryAllocInfo.memoryTypeIndex      = findMemoryTypeIndex(_mainDevice.physicalDevice, memoryRequirements.memoryTypeBits, propFlags);
 
     result = vkAllocateMemory(_mainDevice.logicalDevice, &memoryAllocInfo, nullptr, imageVkDeviceMemory);
     if (result != VK_SUCCESS)
@@ -944,12 +944,13 @@ void VulkanRenderer::createDescriptorPool()
     // CREATE UNIFORM DESCRIPTOR POOL
     // Type of descriptors + how many DESCRIPTORS, not Descriptor Sets (combined makes the pool size)
     // ViewProjection Pool
+    // vp is view projection
     VkDescriptorPoolSize vpPoolSize    = {};
     vpPoolSize.type                    = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     vpPoolSize.descriptorCount         = static_cast<uint32_t>(_vpUniformBuffer.size());
 
     // List of pool sizes
-    std::vector<VkDescriptorPoolSize> descriptorPoolSizes = { vpPoolSize};
+    std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {vpPoolSize};
 
     // Data to create Descriptor Pool
     VkDescriptorPoolCreateInfo poolCreateInfo = {};
@@ -1052,7 +1053,7 @@ void VulkanRenderer::createDescriptorSets()
     setAllocInfo.sType                       = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     setAllocInfo.descriptorPool              = _descriptorPool;                                 // Pool to allocate Descriptor Set from
     setAllocInfo.descriptorSetCount          = static_cast<uint32_t>(_swapChainImages.size());  // Number of sets to allocate
-    setAllocInfo.pSetLayouts                 = vkDescriptorSetLayouts.data();                         // Layouts to use to allocate sets (1:1 relationship)
+    setAllocInfo.pSetLayouts                 = vkDescriptorSetLayouts.data();                   // Layouts to use to allocate sets (1:1 relationship)
 
     // Allocate descriptor sets (multiple)
     VkResult result = vkAllocateDescriptorSets(_mainDevice.logicalDevice, &setAllocInfo, _vkDescriptorSets.data());
@@ -1340,6 +1341,7 @@ bool VulkanRenderer::checkInstanceExtensionSupport(std::vector<const char*>* che
         bool hasExtension = false;
         for (const auto &extension : extensions)
         {
+        // TODO strncmp
             if (strcmp(checkExtension, extension.extensionName))
             {
                 hasExtension = true;
@@ -1362,11 +1364,11 @@ int VulkanRenderer::createTexture(std::string filename)
     int textureImageLoc = createTextureImage(filename);
 
     // Create Image View and add to list
-    VkImageView imageView = createImageView(_vkTextureImages[textureImageLoc], VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT);
-    _vkTextureImageViews.push_back(imageView);
+    VkImageView vkImageView = createVkImageView(_vkTextureImages[textureImageLoc], VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT);
+    _vkTextureImageViews.push_back(vkImageView);
 
     // Create Texture Descriptor
-    int descriptorLoc = createTextureDescriptor(imageView);
+    int descriptorLoc = createTextureDescriptor(vkImageView);
 
     // Return location of set with texture
     return descriptorLoc;
@@ -1384,6 +1386,7 @@ int VulkanRenderer::createTextureImage(std::string fileName)
     VkDeviceMemory imageStagingBufferMemory;
     
     // Create staging buffer to hold loaded data, ready to copy to device
+    // VK_BUFFER_USAGE_TRANSFER_SRC_BIT = buffer can be used as a source of a transfer command.
     createBuffer(_mainDevice.physicalDevice, _mainDevice.logicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         &imageStagingBuffer, &imageStagingBufferMemory);
@@ -1400,7 +1403,9 @@ int VulkanRenderer::createTextureImage(std::string fileName)
     // Create image to hold final texture
     VkImage texImage;
     VkDeviceMemory vkTexDeviceMemory;
-    texImage = createImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+    // VK_IMAGE_USAGE_TRANSFER_DST_BIT = image can be used as the destination of a transfer command.
+    // VK_IMAGE_USAGE_SAMPLED_BIT = image can be used to create a VkImageView suitable for occupying a VkDescriptorSet slot either of type VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, and be sampled by a shader.
+    texImage = createVkImage(width, height, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vkTexDeviceMemory);
 
 
@@ -1685,7 +1690,7 @@ VkExtent2D VulkanRenderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& surf
     }
 }
 
-VkImageView VulkanRenderer::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
+VkImageView VulkanRenderer::createVkImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
 {
     VkImageViewCreateInfo vkImageViewCI = {};
     vkImageViewCI.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

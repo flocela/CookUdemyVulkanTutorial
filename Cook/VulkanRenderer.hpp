@@ -119,9 +119,9 @@ class VulkanRenderer
                                                         VkImageTiling tiling,
                                                         VkFormatFeatureFlags featureFlags);
         bool                      checkValidationLayerSupport();
-        VkImageView               createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+        VkImageView               createVkImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
         VkShaderModule            createShaderModule(const std::vector<char>& code);
-        VkImage                   createImage(uint32_t width,
+        VkImage                   createVkImage(uint32_t width,
                                               uint32_t height,
                                               VkFormat format,
                                               VkImageTiling tiling,

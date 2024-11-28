@@ -202,15 +202,15 @@ static void copyImageBuffer(VkDevice device, VkQueue transferQueue, VkCommandPoo
     VkCommandBuffer transferCommandBuffer = beginCommandBuffer(device, transferCommandPool);
 
     VkBufferImageCopy imageRegion = {};
-    imageRegion.bufferOffset = 0;                                            // Offset into data
-    imageRegion.bufferRowLength = 0;                                        // Row length of data to calculate data spacing
-    imageRegion.bufferImageHeight = 0;                                        // Image height to calculate data spacing
-    imageRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;    // Which aspect of image to copy
-    imageRegion.imageSubresource.mipLevel = 0;                                // Mipmap level to copy
-    imageRegion.imageSubresource.baseArrayLayer = 0;                        // Starting array layer (if array)
-    imageRegion.imageSubresource.layerCount = 1;                            // Number of layers to copy starting at baseArrayLayer
-    imageRegion.imageOffset = { 0, 0, 0 };                                    // Offset into image (as opposed to raw data in bufferOffset)
-    imageRegion.imageExtent = { width, height, 1 };                            // Size of region to copy as (x, y, z) values
+    imageRegion.bufferOffset = 0;                                        // Offset into data
+    imageRegion.bufferRowLength = 0;                                     // Row length of data to calculate data spacing
+    imageRegion.bufferImageHeight = 0;                                   // Image height to calculate data spacing
+    imageRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; // Which aspect of image to copy
+    imageRegion.imageSubresource.mipLevel = 0;                           // Mipmap level to copy
+    imageRegion.imageSubresource.baseArrayLayer = 0;                     // Starting array layer (if array)
+    imageRegion.imageSubresource.layerCount = 1;                         // Number of layers to copy starting at baseArrayLayer
+    imageRegion.imageOffset = { 0, 0, 0 };                               // Offset into image (as opposed to raw data in bufferOffset)
+    imageRegion.imageExtent = { width, height, 1 };                      // Size of region to copy as (x, y, z) values
 
     // Copy buffer to given image. This is the TRANSFER_WRITE.
     vkCmdCopyBufferToImage(transferCommandBuffer, srcBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageRegion);
@@ -220,7 +220,7 @@ static void copyImageBuffer(VkDevice device, VkQueue transferQueue, VkCommandPoo
 //
 static void transitionImageLayout(VkDevice device, VkQueue queue, VkCommandPool commandPool, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    // Create buffer
+    // Create command buffer
     VkCommandBuffer commandBuffer = beginCommandBuffer(device, commandPool);
 
     VkImageMemoryBarrier imageMemoryBarrier = {};
